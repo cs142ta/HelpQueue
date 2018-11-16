@@ -8,7 +8,7 @@ if(isset($_GET["id"])) //only get one person
 		require_once 'CAS-1.3.4/CAS.php';
 		phpCAS::client(CAS_VERSION_2_0,'cas.byu.edu',443,'cas');
 		$auth = phpCAS::checkAuthentication();
-		
+
 		if($auth && $user == phpCAS::getUser())
 		{
 			require_once "DBConnect.php";
@@ -16,19 +16,19 @@ if(isset($_GET["id"])) //only get one person
 			{
 
 				$avgs = getAverages(null);
-				echo json_encode(array("status"=>"success", "list"=>getQueue(null), "stats"=>getStats(), "avgs"=>$avgs, "settings"=>getSettings()));
+				echo json_encode(array("status"=>"success", "list"=>getQueue(null), "helped"=>getHelped(null), "stats"=>getStats(), "avgs"=>$avgs, "settings"=>getSettings()));
 			}
 			else
 			{
 				$temp = getUserStatus($user);
 				echo json_encode($temp);
-			}		
+			}
 		}
 		else
 		{
 			echo json_encode(array("status"=>"loggedOut"));
-		}	
-	
+		}
+
 	//send back the info
 }
 else
