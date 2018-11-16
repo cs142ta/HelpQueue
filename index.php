@@ -80,11 +80,11 @@ if ($auth) {
 				</button>
 					<a class="navbar-brand" ui-sref="home"><span id="courseTitle"></span> Help Queue</a>
 			</div>
-			<?php 
+			<?php
 //			require_once "DBConnect.php";
 			if($isThisATA) //TA
 			{ echo "<script> var pollTimer = '" . getTAPollTime() ."'; </script>";	?>
-				<div id="navbarCollapse" class="collapse navbar-collapse">				
+				<div id="navbarCollapse" class="collapse navbar-collapse">
 					<ul class="nav navbar-nav">
 						<li><a href="#" id="viewQueue">View Queue</a></li>
 						<li><a><input type="checkbox" id="queueActive"/>
@@ -110,7 +110,7 @@ if ($auth) {
 						<li style="padding-right:20px;"><a href="?logout=">Logout</a></li>
 				   </ul>
 				</div>
-				
+
 			<?php } //Student
 				else { echo "<script> var pollTimer = '" . getStudentPollTime() ."'; </script>";
 					   echo "<script> Notification.requestPermission(function (permission) {}); </script>";
@@ -131,7 +131,7 @@ if ($auth) {
 		<!-- Modal for entering student name -->
 		  <div class="modal fade" id="nameChangeModal" role="dialog">
 			<div class="modal-dialog">
-		
+
 			  <!-- Modal content-->
 			  <div class="modal-content">
 				<div class="modal-header">
@@ -148,14 +148,14 @@ if ($auth) {
 				  <button type="button" class="btn btn-default" id="nameSubmit">Submit</button>
 				</div>
 			  </div>
-			  
+
 			</div>
 		   </div>
 
 		<!-- Modal for editing TA name -->
 		  <div class="modal fade" id="taNameEditModal" role="dialog">
 			<div class="modal-dialog">
-		
+
 			  <!-- Modal content-->
 			  <div class="modal-content">
 				<div class="modal-header">
@@ -173,14 +173,14 @@ if ($auth) {
 				  <button type="button" class="btn btn-default" id="editTaNameSubmit">Submit</button>
 				</div>
 			  </div>
-			  
+
 			</div>
 		   </div>
-		   
+
 			<!-- Modal for chat box -->
 		  <div class="modal fade" id="chatModal" role="dialog">
 			<div class="modal-dialog chat-cont">
-		
+
 			  <!-- Modal content-->
 			  <div class="modal-content page-wrap">
 				<div class="modal-header">
@@ -197,12 +197,12 @@ if ($auth) {
 					</form>
 				</div>
 			  </div>
-			  
+
 			</div>
 		   </div>
 
-	
-	<?php 
+
+	<?php
 		//require_once "DBConnect.php";
 		if($isThisATA)
 		{
@@ -230,17 +230,18 @@ if ($auth) {
 				</div>
 				<hr>
 				<div id="list"></div>
+        <div id="helped"></div>
 			</div>
 			<div class="container" id="stats"> <!-- STATS PAGE -->
 				<!--<div class="row">
 					  <input type="radio" name="statsOrder" value="help"> Help Count
 					  <input type="radio" name="statsOrder" value="passOff"> Pass offs
-				</div> I thought about doing this...seemed more work than it was worth. 
-					especially with the extended stats section-->				
+				</div> I thought about doing this...seemed more work than it was worth.
+					especially with the extended stats section-->
 				<div class="row">
 					<div class="col-xs-2">
-						
-					</div>					
+
+					</div>
 					<div class="col-xs-3">
 						<strong>Net Id</strong>
 					</div>
@@ -262,8 +263,8 @@ if ($auth) {
 					<input type="text" id="taInput" placeholder="Enter TA net id to add" style="width:25%;"></input>
 					<input type="text" id="taInputName" placeholder="Enter TA's name to add" style="width:25%;"></input>
 					<button class="btn btn-success btn-lg fa fa-plus" id="addTaBtn"></button>
-				</div>				
-				<div class="row">				
+				</div>
+				<div class="row">
 					<div class="col-xs-3">
 						<strong>Net Id</strong>
 					</div>
@@ -278,13 +279,13 @@ if ($auth) {
 					</div>
 					<div class="col-xs-2">
 						<strong>Action</strong>
-					</div>	
+					</div>
 				</div>
 				<hr>
 				<div id="taList"></div>
 			</div>
 			<div class="container" id="viewSettings"> <!-- Settings -->
-				<hr>				
+				<hr>
 				<div class="row settingsRow">
 					<div class="col-xs-9">
 						Reset the Database. All settings will be set to default and all TA and Student data will be permanently lost.
@@ -295,7 +296,7 @@ if ($auth) {
 				</div>
 				<div class="row settingsRow">
 					<div class="col-xs-9">
-						Course title: <span id="courseTitleField"></span> 
+						Course title: <span id="courseTitleField"></span>
 					</div>
 					<div class="col-xs-3">
 						<button id="changeCourseTitleButton" class="btn btn-warning fa fa-edit"></button>
@@ -303,7 +304,7 @@ if ($auth) {
 				</div>
 				<div class="row settingsRow">
 					<div class="col-xs-9">
-						Polling time for students: <span id="studentPollTime"></span> miliseconds 
+						Polling time for students: <span id="studentPollTime"></span> miliseconds
 					</div>
 					<div class="col-xs-3">
 						<button id="changeStudentPollTime" class="btn btn-warning fa fa-edit"></button>
@@ -341,6 +342,38 @@ if ($auth) {
 					 	<button id="changePassOffHighlighColorBtn" class="btn btn-warning fa fa-edit"></button>
 					</div>
 				</div>
+        <div class="row settingsRow">
+					<div class="col-xs-9">
+						Change the number of questions students can ask per day: <span class="questionsPerDay"> </span> questions
+					</div>
+					<div class="col-xs-3">
+					 	<button id="changeQuestionsPerDayBtn" class="btn btn-warning fa fa-edit"></button>
+					</div>
+				</div>
+        <div class="row settingsRow">
+					<div class="col-xs-9">
+						Change the number of questions students can ask per week: <span class="questionsPerWeek"> </span> questions
+					</div>
+					<div class="col-xs-3">
+					 	<button id="changeQuestionsPerWeekBtn" class="btn btn-warning fa fa-edit"></button>
+					</div>
+				</div>
+        <!-- <div class="row settingsRow">
+					<div class="col-xs-9">
+						Change the time to auto disable the queue:
+					</div>
+					<div class="col-xs-3">
+					 	<button id="changeAutoTimeBtn" class="btn btn-warning fa fa-edit"></button>
+					</div>
+				</div> -->
+        <!-- <div class="row settingsRow"> -->
+					<!-- <div class="col-xs-9">
+						Auto Disable the queue:
+					</div>
+					<div class="col-xs-3">
+					 	<input id="autoDisable" type="checkbox" style="margin-left:15px;"></input>
+					</div>
+				</div> -->
 				<div class="row settingsRow">
 					<div class="col-xs-9">
 						Require Students to enter in a question:
@@ -352,10 +385,10 @@ if ($auth) {
 			</div>
 			<div class="container" id="editRawData"> <!-- Update Raw Data -->
 				<h3>
-					Be careful! This will update the actual data in the database. It could ruin the integrity 
+					Be careful! This will update the actual data in the database. It could ruin the integrity
 					of the database. There is no value checking or verifying and there is no undo button. Once you
-					click save the update is put into the database. 
-					Be cautious what you do here. This should only be to fix anomalies in the data.				
+					click save the update is put into the database.
+					Be cautious what you do here. This should only be to fix anomalies in the data.
 				</h3>
 				<div id="editRawDataRange">
 					<p id="editRawDataDateInput">
@@ -389,7 +422,7 @@ if ($auth) {
 							<p>
 								<input type="radio" name="graphSpanning" value="oneDay">Span One Day</input>
 								<input type="radio" name="graphSpanning" value="multipleDay">Span Multiple Days</input>
-							</p>	
+							</p>
 							<button id="updateExtendedStatsViews" class="btn btn-success">Update to this date range</button>
 						</div>
 						<div id="graphsContent">
@@ -441,13 +474,13 @@ if ($auth) {
 						<table id="studentDataTotalTable" class="compact">
 							<thead></thead>
 							<tbody></tbody>
-							<tfoot id="studentDataTotalTableFooter">         
+							<tfoot id="studentDataTotalTableFooter">
 								<tr>
 									<th style="text-align:right">Total:</th>
 									<?php
 									//this is the easiest and fastest way to insert the <th> needed for the table footer
 									//it wasn't my first choice but adding them via JS caused a load of headaches and finally
-									//I had to move on and this would work so I went with it. The biggest weak point here is 
+									//I had to move on and this would work so I went with it. The biggest weak point here is
 									//if a new TA is added and then the user goes to this table, the table will look wrong untill
 									//the page is refreshed.
 									$tas = getAllTAs(null);
@@ -527,7 +560,7 @@ if ($auth) {
 		<!-- Modal for extended stats end time wrongly formatted-->
 		  <div class="modal fade" id="startTimeAfterEndError" role="dialog">
 			<div class="modal-dialog">
-		
+
 			  <!-- Modal content-->
 			  <div class="modal-content">
 				<div class="modal-header">
@@ -542,14 +575,14 @@ if ($auth) {
 				  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
 				</div>
 			  </div>
-			  
+
 			</div>
-		   </div>	
+		   </div>
 
 		<!-- Modal for entering class name-->
 		  <div class="modal fade" id="courseNameChangeModal" role="dialog">
 			<div class="modal-dialog">
-		
+
 			  <!-- Modal content-->
 			  <div class="modal-content">
 				<div class="modal-header">
@@ -566,14 +599,14 @@ if ($auth) {
 				  <button type="button" class="btn btn-default" id="courseSubmit">Submit</button>
 				</div>
 			  </div>
-			  
+
 			</div>
 		   </div>
 
 		<!-- Modal for changing student polling times-->
 		  <div class="modal fade" id="studentChangePollTimeModal" role="dialog">
 			<div class="modal-dialog">
-		
+
 			  <!-- Modal content-->
 			  <div class="modal-content">
 				<div class="modal-header">
@@ -591,14 +624,14 @@ if ($auth) {
 				  <button type="button" class="btn btn-success" id="studentPollTimeSubmit">Submit</button>
 				</div>
 			  </div>
-			  
+
 			</div>
 		   </div>
 
 		  <!-- Modal for changing TA polling times-->
 		  <div class="modal fade" id="taChangePollTimeModal" role="dialog">
 			<div class="modal-dialog">
-		
+
 			  <!-- Modal content-->
 			  <div class="modal-content">
 				<div class="modal-header">
@@ -616,14 +649,14 @@ if ($auth) {
 				  <button type="button" class="btn btn-success" id="taPollTimeSubmit">Submit</button>
 				</div>
 			  </div>
-			  
+
 			</div>
 		   </div>
 
 		<!-- Modal for changing notify threshold-->
 		  <div class="modal fade" id="notifyThresholdChangeModal" role="dialog">
 			<div class="modal-dialog">
-		
+
 			  <!-- Modal content-->
 			  <div class="modal-content">
 				<div class="modal-header">
@@ -641,39 +674,110 @@ if ($auth) {
 				  <button type="button" class="btn btn-success" id="notifyThresholdSubmit">Submit</button>
 				</div>
 			  </div>
-			  
+
 			</div>
 		   </div>
 
 		<!-- Modal for changing last X min -->
 		  <div class="modal fade" id="changeLastXMinModal" role="dialog">
-			<div class="modal-dialog">
-		
-			  <!-- Modal content-->
-			  <div class="modal-content">
-				<div class="modal-header">
-				  <h4 class="modal-title">How many minutes back to go?</h4>
-				</div>
-				<div class="modal-body">
-					<center>
-				  <p>Show number of enqueues and dequeues from how many minutes ago?
-				  </p>
-					<input type="text" id="changeLastXMinInput" placeholder="Enter value here" width="70%"></input>
-					</center>
-				</div>
-				<div class="modal-footer">
-				  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-				  <button type="button" class="btn btn-success" id="changeLastXMinSubmit">Submit</button>
-				</div>
-			  </div>
-			  
-			</div>
-		   </div>
+  			<div class="modal-dialog">
+
+  			  <!-- Modal content-->
+  			  <div class="modal-content">
+  				<div class="modal-header">
+  				  <h4 class="modal-title">How many minutes back to go?</h4>
+  				</div>
+  				<div class="modal-body">
+  					<center>
+  				  <p>Show number of enqueues and dequeues from how many minutes ago?
+  				  </p>
+  					<input type="text" id="changeLastXMinInput" placeholder="Enter value here" width="70%"></input>
+  					</center>
+  				</div>
+  				<div class="modal-footer">
+  				  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+  				  <button type="button" class="btn btn-success" id="changeLastXMinSubmit">Submit</button>
+  				</div>
+  			  </div>
+
+  			</div>
+		  </div>
+
+      <div class="modal fade" id="changeQuestionPerDayModal" role="dialog">
+  			<div class="modal-dialog">
+
+  			  <!-- Modal content-->
+  			  <div class="modal-content">
+  				<div class="modal-header">
+  				  <h4 class="modal-title">How many questions per day?</h4>
+  				</div>
+  				<div class="modal-body">
+  					<center>
+  				  <p>How many questions should students be allowed to ask per day? (-1 means no limit)
+  				  </p>
+  					<input type="text" id="changeQuestionPerDayInput" placeholder="Enter value here" width="70%"></input>
+  					</center>
+  				</div>
+  				<div class="modal-footer">
+  				  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+  				  <button type="button" class="btn btn-success" id="changeQuestionPerDaySubmit">Submit</button>
+  				</div>
+  			  </div>
+
+  			</div>
+		  </div>
+
+      <div class="modal fade" id="changeQuestionPerWeekModal" role="dialog">
+  			<div class="modal-dialog">
+
+  			  <!-- Modal content-->
+  			  <div class="modal-content">
+  				<div class="modal-header">
+  				  <h4 class="modal-title">How many questions per week?</h4>
+  				</div>
+  				<div class="modal-body">
+  					<center>
+  				  <p>How many questions should students be allowed to ask per week? (-1 means no limit)
+  				  </p>
+  					<input type="text" id="changeQuestionPerWeekInput" placeholder="Enter value here" width="70%"></input>
+  					</center>
+  				</div>
+  				<div class="modal-footer">
+  				  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+  				  <button type="button" class="btn btn-success" id="changeQuestionPerWeekSubmit">Submit</button>
+  				</div>
+  			  </div>
+
+  			</div>
+		  </div>
+
+      <!-- <div class="modal fade" id="changeAutoTimesModal" role="dialog">
+  			<div class="modal-dialog">
+
+  			  <div class="modal-content">
+  				<div class="modal-header">
+  				  <h4 class="modal-title">What time to auto disable the queue?</h4>
+  				</div>
+  				<div class="modal-body">
+  					<center>
+              <p>What time would you like to stop more students from getting on the queue?</p>
+              <input type="time" id="lastTime" name="appt-time" min="0:00" max="23:59" value="21:00" required />
+  					</center>
+  				</div>
+  				<div class="modal-footer">
+  				  <button type="button" class="btn btn-default" data-dismiss="modal" onclick="closeAutoTimeModal()">Close</button>
+  				  <button type="button" class="btn btn-success" id="changeAutoTimeSubmit">Submit</button>
+  				</div>
+  			  </div>
+
+  			</div>
+		  </div> -->
+
 
 		<!-- Modal for changing passoff highlight color-->
 		  <div class="modal fade" id="changePassOffHighlighColorModal" role="dialog">
 			<div class="modal-dialog">
-		
+
 			  <!-- Modal content-->
 			  <div class="modal-content">
 				<div class="modal-header">
@@ -696,7 +800,7 @@ if ($auth) {
 							<span id="passOff_yellow" style="background-color:yellow;" class="aSquare passOffSelector"></span>
 						</div>
 						<div class="col-xs-4">
-							<span id="passOff_orange" style="background-color:orange;" class="aSquare passOffSelector"></span>
+							<span id="passOff_orange" styDayle="background-color:orange;" class="aSquare passOffSelector"></span>
 						</div>
 						<div class="col-xs-4">
 							<span id="passOff_green" style="background-color:green;" class="aSquare passOffSelector"></span>
@@ -707,7 +811,7 @@ if ($auth) {
 				  <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
 				</div>
 			  </div>
-			  
+
 			</div>
 		   </div>
 
@@ -721,7 +825,7 @@ if ($auth) {
 					<!--<div class="col-xs-9"> -->
 					<div class="col-xs-12">
 						<h3>*Please preface your question with your room number (i.e. 1119)</h3>
-						<input class="form-control" type="text" id="questionInput" placeholder="Enter your question here" maxlength="300">
+						<input class="form-control" type="text" id="questionInput" placeholder="Enter your question here" maxlength="200">
 						</input>
 						<span style="float:left; font-size:75%;" id="questionInputLengthLeft"></span>
 					</div>
@@ -757,9 +861,9 @@ if ($auth) {
 			</div>
 		</div>
 		</center>
-		
+
 	<!-- END STUDENT -->
-	<?php 
+	<?php
 		//add to the DB
 		//require_once 'DBConnect.php';
 		addStudent(phpCAS::getUser());
@@ -767,6 +871,14 @@ if ($auth) {
 		<p style="padding-left:10px; padding-top:30px;">
 			<ul>
 				<li>You are currently logged in as: <b><?php echo phpCAS::getUser(); ?></b>.</li>
+        <?php if(!$isThisATA){ ?>
+          <?php require_once 'DBConnect.php'; if(shouldLimitDaily()){?>
+            <li>You have <b><span id="questionsRemainingDay"></span> of <span id="questionsDaily"></span></b> daily questions remaining</li>
+          <?php }?>
+          <?php require_once 'DBConnect.php'; if(shouldLimitWeekly()){?>
+            <li>You have <b><span id="questionsRemainingWeek"></span> of <span id="questionsWeekly"></span></b> weekly questions remaining</li>
+          <?php }?>
+        <?php }?>
 				<li>The current average wait time for the top <span id="topCount"></span> people on the queue is <span id="topAvg"></span></li>
 				<li>The current length of the queue is <span id="queueLen"></span>.</li>
 				<li>The current number of people being helped is <span id="currentlyBeingHelped"></span>.</li>
@@ -782,7 +894,7 @@ if ($auth) {
 ?>
 	<script language="javascript">
     	window.location.href = "?login="
-	</script>    
+	</script>
 <?php
 }
 
