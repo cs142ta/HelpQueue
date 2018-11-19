@@ -195,7 +195,7 @@ function verifyStudentInputToggleButton() {
         removeSpinner("getHelpButtonNoQuestion");
         removeSpinner("passOffButtonNoQuestion");
         console.log(theQuestion);
-        if (theQuestion.length > 0 || passOff) {
+        if ((theQuestion.length > 0 && $("#roomSelector").val() != "invalid")|| passOff) {
             //enable the get in line button
             $("#getHelpButton").removeAttr('disabled');
             $("#getHelpButton").html('Get in line for help');
@@ -1638,22 +1638,29 @@ $(function() {
     //When you are in line disable the question input and the check box. when you get out of line reenable
     $("#questionInput").on('input', verifyStudentInputToggleButton);
     $("#passOffCheckBox").on('click', verifyStudentInputToggleButton);
+    $("#roomSelector").on('change', verifyStudentInputToggleButton);
 
     $("#getHelpButton").on('click', function() {
         var theQuestion = $("#questionInput").val();
         var passOff = $("#passOffCheckBox").is(":checked");
-
+        var roomNumber = $("#roomSelector").val();
         //validate input, but only already in line
         if ((theQuestion.length < 0 && passOff == false) && !poll) {
             //error. not enought input (shouldn't ever get here, but just in case)
             alert("Please enter a question or click pass off");
         } else {
+          if (roomNumber != "invalid")
+          {
             $("#questionInput").attr('disabled', 'disabled');
             $("#passOffCheckBox").attr('disabled', 'disabled');
 
             spin("getHelpButton");
 
-            submitRequest(user, theQuestion, passOff);
+            submitRequest(user, roomNumber + " - " + theQuestion, passOff);
+          }
+          else {
+            alert("Please choose a room number");
+          }
         }
     });
 
@@ -1818,7 +1825,8 @@ $(function() {
                         keyboard: false
                     });
             };
-            var error = function(data) {//alert("There was an error saving your name");
+            var error = function(data) {
+              console.log(data);//alert("There was an error saving your name");
             };
 
             $("#nameInput").val("");

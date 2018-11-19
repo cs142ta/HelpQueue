@@ -1298,7 +1298,7 @@
 		}
 		else
 		{
-			$toReturn = array('status'=>'error', 'name'=>'error');
+			$toReturn = array('status'=>'error', 'name'=> null);
 		}
 		$result->finalize();
 		$stmt->close();

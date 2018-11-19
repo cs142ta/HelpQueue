@@ -20,7 +20,7 @@ else if ($auth){
   	<script src="static/js/spin.min.js"></script>
 
   	<script src="static/js/chat.js"></script>
-  	<script src="static/js/index_student.min.js"></script>
+  	<script src="static/js/index_student.js"></script>
   </head>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <body>
@@ -98,9 +98,23 @@ else if ($auth){
         <!--<div class="col-xs-9"> -->
         <div class="col-xs-12">
           <h3>*Please preface your question with your room number (i.e. 1119)</h3>
+
+          <div class="row">
+        <div class="col-xs-1" style="width:80%;">
           <input class="form-control" type="text" id="questionInput" placeholder="Enter your question here" maxlength="200">
-          </input>
-          <span style="float:left; font-size:75%;" id="questionInputLengthLeft"></span>
+        <span style="float:left; font-size:75%;" id="questionInputLengthLeft">200 characters remaining</span></div>
+        <div class="col-xs-1" style="width:20%;">
+            <select id="roomSelector">
+                <option selected hidden value="invalid">ROOM #</option>
+                <option value="1119">1119</option>
+                <option value="1121">1121</option>
+                <option value="1138">1138</option>
+                <option value="1102">1102</option>
+            </select>
+        <div>
+    </div>
+
+        </div></div>
         </div>
         <!--
         <div class="col-xs-1">

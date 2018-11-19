@@ -615,26 +615,26 @@ if ($isTA) {
             </div>
          </div>
       </div>
-      <div class="modal fade" id="changeAutoTimesModal" role="dialog">
-         <div class="modal-dialog">
+      <!-- <div class="modal fade" id="changeAutoTimesModal" role="dialog"> -->
+         <!-- <div class="modal-dialog"> -->
             <!-- Modal content-->
-            <div class="modal-content">
-               <div class="modal-header">
-                  <h4 class="modal-title">What time to auto disable the queue?</h4>
-               </div>
-               <div class="modal-body">
-                  <center>
-                     <p>What time would you like to stop more students from getting on the queue?</p>
-                     <?php echo '<input type="time" id="lastTime" name="appt-time" min="0:00" max="23:59" value = "'.getAutoDisableTime().'" required />' ?>
-                  </center>
-               </div>
-               <div class="modal-footer">
-                  <button type="button" class="btn btn-default" data-dismiss="modal" onclick="closeAutoTimeModal()">Close</button>
-                  <button type="button" class="btn btn-success" id="changeAutoTimeSubmit">Submit</button>
-               </div>
-            </div>
-         </div>
-      </div>
+            <!-- <div class="modal-content"> -->
+               <!-- <div class="modal-header"> -->
+                  <!-- <h4 class="modal-title">What time to auto disable the queue?</h4> -->
+               <!-- </div> -->
+               <!-- <div class="modal-body"> -->
+                  <!-- <center> -->
+                     <!-- <p>What time would you like to stop more students from getting on the queue?</p> -->
+                     <!-- <?php //echo '<input type="time" id="lastTime" name="appt-time" min="0:00" max="23:59" value = "'.getAutoDisableTime().'" required />' ?> -->
+                  <!-- </center> -->
+               <!-- </div> -->
+               <!-- <div class="modal-footer"> -->
+                  <!-- <button type="button" class="btn btn-default" data-dismiss="modal" onclick="closeAutoTimeModal()">Close</button> -->
+                  <!-- <button type="button" class="btn btn-success" id="changeAutoTimeSubmit">Submit</button> -->
+               <!-- </div> -->
+            <!-- </div> -->
+         <!-- </div> -->
+      <!-- </div> -->
       <!-- Modal for changing passoff highlight color-->
       <div class="modal fade" id="changePassOffHighlighColorModal" role="dialog">
          <div class="modal-dialog">
