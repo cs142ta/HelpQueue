@@ -914,6 +914,62 @@
 		return $listToReturn;
 	}
 
+	function isMOTDLink()
+	{
+		$db = new MyDB();
+		$db->exec("BEGIN");
+		$sql = "SELECT value FROM SETTINGS WHERE name='motdLink'";
+		$stmt = $db->prepare($sql);
+		$result = $stmt->execute();
+		$value = $result->fetchArray(SQLITE3_ASSOC);
+		$result->finalize();
+		$stmt->close();
+		$db->close();
+		unset($db);
+		return ($value['value'] != "false");
+	}
+
+	function getMOTDLink()
+	{
+		$db = new MyDB();
+		$db->exec("BEGIN");
+		$sql = "SELECT value FROM SETTINGS WHERE name='motdLink'";
+		$stmt = $db->prepare($sql);
+		$result = $stmt->execute();
+		$value = $result->fetchArray(SQLITE3_ASSOC);
+		$result->finalize();
+		$stmt->close();
+		$db->close();
+		unset($db);
+		return $value['value'];
+	}
+
+	function getMOTD()
+	{
+		$db = new MyDB();
+		$db->exec("BEGIN");
+		$sql = "SELECT value FROM SETTINGS WHERE name='motd'";
+		$stmt = $db->prepare($sql);
+		$result = $stmt->execute();
+		$value = $result->fetchArray(SQLITE3_ASSOC);
+		$result->finalize();
+		$stmt->close();
+		$db->close();
+		unset($db);
+		return $value["value"];
+	}
+
+	function setMOTD($motd, $link, $netId)
+	{
+		if (verifyTA($netId))
+		{
+			$db = new MyDB();
+			$db->exec("BEGIN");
+			$sql = "UPDATE SETTINGS SET value = :msg WHERE name = 'motd'; UPDATE SETTINGS SET value = :link WHERE name ='motdLink'";
+
+		}
+	}
+
 	function getStats()
 	{
 		$listToReturn = array("tas"=>array(),"students"=>array());

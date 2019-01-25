@@ -275,7 +275,7 @@ if ($isTA) {
                   <button id="changePassOffHighlighColorBtn" class="btn btn-warning fa fa-edit"></button>
                </div>
             </div>
-            <div class="row settingsRow">
+            <!-- <div class="row settingsRow">
                <div class="col-xs-9">
                   Change the time to auto disable the queue:
                </div>
@@ -290,7 +290,7 @@ if ($isTA) {
                <div class="col-xs-3">
                   <input id="autoDisable" type="checkbox" style="margin-left:15px;"></input>
                </div>
-            </div>
+            </div> -->
             <div class="row settingsRow">
                <div class="col-xs-9">
                   Require Students to enter in a question:
@@ -625,7 +625,7 @@ if ($isTA) {
                <!-- <div class="modal-body"> -->
                   <!-- <center> -->
                      <!-- <p>What time would you like to stop more students from getting on the queue?</p> -->
-                     <!-- <?php //echo '<input type="time" id="lastTime" name="appt-time" min="0:00" max="23:59" value = "'.getAutoDisableTime().'" required />' ?> -->
+                     <!-- <?php //  echo '<input type="time" id="lastTime" name="appt-time" min="0:00" max="23:59" value = "'.getAutoDisableTime().'" required />' ?> -->
                   <!-- </center> -->
                <!-- </div> -->
                <!-- <div class="modal-footer"> -->

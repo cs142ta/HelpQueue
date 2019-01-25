@@ -1649,13 +1649,16 @@ $(function() {
             //error. not enought input (shouldn't ever get here, but just in case)
             alert("Please enter a question or click pass off");
         } else {
-          if (roomNumber != "invalid")
+          if (roomNumber != "invalid" || getCurrentHelpButtonAction() == "/removeFromQueue.php")
           {
             $("#questionInput").attr('disabled', 'disabled');
             $("#passOffCheckBox").attr('disabled', 'disabled');
 
             spin("getHelpButton");
-
+            if (getCurrentHelpButtonAction() == "/removeFromQueue.php")
+            {
+              poll = true;
+            }
             submitRequest(user, roomNumber + " - " + theQuestion, passOff);
           }
           else {
@@ -2421,7 +2424,7 @@ function updateUI(data) {
             if (parseInt(spot) < 0) //not in line
             {
                 helpButtonHandle = "/queueUp.php";
-                poll = false;
+                poll = true;
                 currentSpotInLine = -1;
                 $("#questionInput").removeAttr('disabled');
                 $("#passOffCheckBox").removeAttr('disabled');

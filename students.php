@@ -97,13 +97,13 @@ else if ($auth){
       <div id="questionsRequired">	<!-- This is for when questions are required -->
         <!--<div class="col-xs-9"> -->
         <div class="col-xs-12">
-          <h3>*Please preface your question with your room number (i.e. 1119)</h3>
+          <h1 style="font-size:250%;"><strong><?php if(isMOTDLink()){ echo ("<a href='".getMOTDLink()."'>");}?><?php echo getMOTD()?><?php if (isMOTDLink()) {echo "</a>";}?></strong></h1>
 
           <div class="row">
         <div class="col-xs-1" style="width:80%;">
           <input class="form-control" type="text" id="questionInput" placeholder="Enter your question here" maxlength="200">
         <span style="float:left; font-size:75%;" id="questionInputLengthLeft">200 characters remaining</span></div>
-        <div class="col-xs-1" style="width:20%;">
+        <div class="col-xs-1" style="width:20%;vertical-align:middle;">
             <select id="roomSelector">
                 <option selected hidden value="invalid">ROOM #</option>
                 <option value="1119">1119</option>
