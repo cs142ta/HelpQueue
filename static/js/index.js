@@ -2134,6 +2134,40 @@ $(function() {
 
     });
 
+    $("#changeMOTDBtn").on("click", function() {
+        $("#motdChangeModal").modal({
+            backdrop: 'static',
+            keyboard: false
+        });
+    });
+
+    $("#motdSubmit").on("click", function() {
+        var modtIn = $("#motdInput").val();
+        var motdLink = $("#motdLinkInput").val();
+        if (modtIn.length <= 0) {
+            alert("Please enter a MOTD");
+        } else {
+            $('#motdChangeModal').modal('hide');
+            var obj = {
+                motd: modtIn,
+                motdLink: motdLink
+            };
+
+            var success = function(data) {
+              console.log("FDSFDSFDSFSDFDSFSDSFDSFDSFSDFSDFD");
+              updateUI({
+                  settings: data
+              });
+            };
+            var error = function(data) {
+              alert("There was an error saving your name");
+            };
+
+            $("#motdInput").val("");
+            postData(obj, "/changeMOTD.php", success, error);
+        }
+    });
+
     $("#changePassOffHighlighColorBtn").on("click", function() {
         $("#changePassOffHighlighColorModal").modal();
         $(".passOffSelector").on('click', function() {
@@ -2431,6 +2465,11 @@ function updateUI(data) {
                         originalTitle = value + " Help Queue";
                         document.title = value + " Help Queue";
                     }
+                }
+                if (key === "motd")
+                {
+                  $("#currentMOTD").empty();
+                  $("#currentMOTD").html(value);
                 }
                 if (key === "notifyThreshold") {
                     notifyThresholdNum = value;
@@ -3158,8 +3197,6 @@ function postData(userName, handle) {
 }
 
 function postData(userName, handle, callBackSuccess, callBackError) {
-
-
     $.ajax({
         url: window.location.origin + addressBase + handle,
         type: 'post',
@@ -3168,6 +3205,7 @@ function postData(userName, handle, callBackSuccess, callBackError) {
         error: callBackError,
         data: userName
     });
+    console.log(userName);
 }
 
 Chart.types.Bar.extend({

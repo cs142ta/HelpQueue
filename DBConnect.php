@@ -959,15 +959,28 @@
 		return $value["value"];
 	}
 
-	function setMOTD($motd, $link, $netId)
+	function setMOTD($motd)
 	{
-		if (verifyTA($netId))
-		{
 			$db = new MyDB();
 			$db->exec("BEGIN");
-			$sql = "UPDATE SETTINGS SET value = :msg WHERE name = 'motd'; UPDATE SETTINGS SET value = :link WHERE name ='motdLink'";
+			$sql = "UPDATE SETTINGS SET value = :msg WHERE name = 'motd'";
+			$stmt = $db->prepare($sql);
+			$stmt->bindValue(":msg", $motd);
+			$stmt->execute();
+			$stmt->close();
+			unset($db);
+	}
 
-		}
+	function setMOTDLink($link)
+	{
+		$db = new MyDB();
+		$db->exec("BEGIN");
+		$sql2 = "UPDATE SETTINGS SET value = :link WHERE name ='motdLink'";
+		$stmt2 = $db->prepare($sql2);
+		$stmt2->bindValue(":link", $link);
+		$stmt2->execute();
+		$stmt2->close();
+		unset($db);
 	}
 
 	function getStats()
@@ -1488,20 +1501,23 @@
 
 	function changeSetting($keyIn, $valueIn)
 	{
-		$db = new MyDB();
-		$db->exec("BEGIN");
-		$sql = "UPDATE SETTINGS SET value = :valueIn WHERE name = :keyIn";
-		$stmt = $db->prepare($sql);
-		$stmt->bindValue(":valueIn", $valueIn);
-		$stmt->bindValue(":keyIn", $keyIn);
+		if (verifyTA($netId))
+		{
+			$db = new MyDB();
+			$db->exec("BEGIN");
+			$sql = "UPDATE SETTINGS SET value = :valueIn WHERE name = :keyIn";
+			$stmt = $db->prepare($sql);
+			$stmt->bindValue(":valueIn", $valueIn);
+			$stmt->bindValue(":keyIn", $keyIn);
 
-		$result = $stmt->execute();
+			$result = $stmt->execute();
 
-		$result->finalize();
-		$stmt->close();
-		$db->exec("COMMIT");
-		$db->close();
-		unset($db);
+			$result->finalize();
+			$stmt->close();
+			$db->exec("COMMIT");
+			$db->close();
+			unset($db);
+		}
 		//return array($key=>$value);
 		return getSettings();
 	}

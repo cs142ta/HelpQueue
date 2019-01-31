@@ -30,7 +30,7 @@ if ($isTA) {
       <script src="static/js/jquery.easy-autocomplete.min.js"></script>
       <!-- ----------------- End TA Resources ------------------->
       <script src="static/js/chat.js"></script>
-      <script src="static/js/index.min.js"></script>
+      <script src="static/js/index.js"></script>
    </head>
    <meta name="viewport" content="width=device-width, initial-scale=1">
    <body>
@@ -274,6 +274,14 @@ if ($isTA) {
                <div class="col-xs-3">
                   <button id="changePassOffHighlighColorBtn" class="btn btn-warning fa fa-edit"></button>
                </div>
+            </div>
+            <div class="row settingsRow">
+              <div class="col-xs-9">
+                 Current message of the day:  <span id="currentMOTD"> </span>
+              </div>
+              <div class="col-xs-3">
+                 <button id="changeMOTDBtn" class="btn btn-warning fa fa-edit"></button>
+              </div>
             </div>
             <!-- <div class="row settingsRow">
                <div class="col-xs-9">
@@ -523,6 +531,28 @@ if ($isTA) {
                </div>
                <div class="modal-footer">
                   <button type="button" class="btn btn-default" id="courseSubmit">Submit</button>
+               </div>
+            </div>
+         </div>
+      </div>
+      <!-- Modal for changing the MOTD-->
+      <div class="modal fade" id="motdChangeModal" role="dialog">
+         <div class="modal-dialog">
+            <!-- Modal content-->
+            <div class="modal-content">
+               <div class="modal-header">
+                  <h4 class="modal-title">Course Title</h4>
+               </div>
+               <div class="modal-body">
+                  <center>
+                     <p>What should the MOTD say?</p>
+                     <input type="text" id="motdInput" placeholder="Enter message here" width="70%"></input>
+                     <p>Where should it link (leave blank for no link)?</p>
+                     <input type="text" id="motdLinkInput" placeholder="(optional)" width="70%"></input>
+                  </center>
+               </div>
+               <div class="modal-footer">
+                  <button type="button" class="btn btn-default" id="motdSubmit">Submit</button>
                </div>
             </div>
          </div>
