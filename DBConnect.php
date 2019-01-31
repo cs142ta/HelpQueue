@@ -926,7 +926,7 @@
 		$stmt->close();
 		$db->close();
 		unset($db);
-		return ($value['value'] != "false");
+		return ($value['value'] != "");
 	}
 
 	function getMOTDLink()
@@ -968,6 +968,8 @@
 			$stmt->bindValue(":msg", $motd);
 			$stmt->execute();
 			$stmt->close();
+			$db->exec("COMMIT");
+			$db->close();
 			unset($db);
 	}
 
@@ -980,6 +982,8 @@
 		$stmt2->bindValue(":link", $link);
 		$stmt2->execute();
 		$stmt2->close();
+		$db->exec("COMMIT");
+		$db->close();
 		unset($db);
 	}
 
@@ -1501,8 +1505,6 @@
 
 	function changeSetting($keyIn, $valueIn)
 	{
-		if (verifyTA($netId))
-		{
 			$db = new MyDB();
 			$db->exec("BEGIN");
 			$sql = "UPDATE SETTINGS SET value = :valueIn WHERE name = :keyIn";
@@ -1517,7 +1519,6 @@
 			$db->exec("COMMIT");
 			$db->close();
 			unset($db);
-		}
 		//return array($key=>$value);
 		return getSettings();
 	}

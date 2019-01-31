@@ -31,6 +31,42 @@ if ($isTA) {
       <!-- ----------------- End TA Resources ------------------->
       <script src="static/js/chat.js"></script>
       <script src="static/js/index.js"></script>
+      <script>
+            window.addEventListener("click", function() {
+              if(menuDisplayed == true){
+                  menuBox.style.display = "none";
+              }
+            }, true);
+      </script>
+      <style>
+            .menu
+            {
+                width: 150px;
+                box-shadow: 3px 3px 5px #888888;
+                border-style: solid;
+                border-width: 1px;
+                border-color: grey;
+                border-radius: 2px;
+                padding-left: 5px;
+                padding-right: 5px;
+                padding-top: 3px;
+                padding-bottom: 3px;
+                position: fixed;
+                background-color: #FFFFFF;
+                display: none;
+            }
+
+            .menu-item
+            {
+                height: 20px;
+            }
+
+            .menu-item:hover
+            {
+                background-color: #6CB5FF;
+                cursor: pointer;
+            }
+        </style>
    </head>
    <meta name="viewport" content="width=device-width, initial-scale=1">
    <body>
@@ -143,10 +179,7 @@ if ($isTA) {
          <div class="container" id="queue">
             <!-- MAIN QUEUE PAGE -->
             <div class="row">
-               <!--<div class="col-xs-3">
-                  <strong>Net Id</strong>
-                  </div>-->
-               <div class="col-xs-3">
+               <div class="col-xs-2">
                   <strong>Name</strong>
                </div>
                <div class="col-xs-5">
@@ -154,6 +187,9 @@ if ($isTA) {
                </div>
                <div class="col-xs-2">
                   <strong>Time</strong>
+               </div>
+               <div class="col-xs-1">
+                 <strong>Conceptual?</strong>
                </div>
                <div class="col-xs-2">
                   <strong>Action</strong>
@@ -716,6 +752,10 @@ if ($isTA) {
       </p>
       <div id="sexyRexy"></div>
       <div id="easterEggTrigger" style="position:fixed; bottom:0; color:#fefefe; cursor:pointer;">Credits</div>
+      <div class="menu">
+        <div class="menu-item" onclick="removeNormal()">Remove</div>
+        <div class="menu-item" onclick="removeFree()">Don't Count</div>
+      </div>
    </body>
 </html>
 <?php

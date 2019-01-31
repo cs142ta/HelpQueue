@@ -31,6 +31,9 @@ var flashTitleBool = false;
 var showNotifBool = false;
 var currentlyGettingHelp = false;
 var adjustTimeModalOpen = false;
+var menuDisplayed = false;
+var menuBox = null;
+var netIdToRemove = "";
 
 //count the time waiting
 setInterval(function() {
@@ -2154,13 +2157,11 @@ $(function() {
             };
 
             var success = function(data) {
-              console.log("FDSFDSFDSFSDFDSFSDSFDSFDSFSDFSDFD");
               updateUI({
                   settings: data
               });
             };
             var error = function(data) {
-              alert("There was an error saving your name");
             };
 
             $("#motdInput").val("");
@@ -2865,9 +2866,24 @@ function updateUI(data) {
             // }
             // else // currently getting help
             // {
-            output = '<div class="row myRow gettingHelpRow" id="' + obj.netId + '">' + '<div class="col-xs-3">' + obj.name + '<br/>(Being helped by: ' + convertNetIdToName(obj.beingHelpedBy) + ')</div>' + questionColumn + '<div class="col-xs-2">' + getTimeDifference(parseInt(obj.startedGettingHelpTime)) + '</div>' + '<div class="col-xs-2"><button id="removeButton' + obj.netId + '" onClick=dequeuePerson(\'' + obj.netId + '\') class="btn btn-danger btn-lg fa fa-times"> Remove' + '</button></div></div>';
+            output = '<div class="row myRow gettingHelpRow" id="' + obj.netId + '">' + '<div class="col-xs-3">' + obj.name + '<br/>(Being helped by: ' + convertNetIdToName(obj.beingHelpedBy) + ')</div>' + questionColumn + '<div class="col-xs-2">' + getTimeDifference(parseInt(obj.startedGettingHelpTime)) + '</div>' + '<div class="col-xs-2"><section contextmenu="dequeueMenu"><menu type="context" id="dequeueMenu"><menuitem label="Remove" onclick=dequeuePerson(\'' + obj.netId + '\')></menuitem><menuitem label="Remove but don\'t count" onClick="=dequeuePersonFree(\'' + obj.netId + '\')"></menuitem></menu><button id="removeButton' + obj.netId + '" onClick=dequeuePerson(\'' + obj.netId + '\') class="btn btn-danger btn-lg fa fa-times"> Remove' + '</button></section></div></div>';
             // }
             $('#helped').append(output);
+            var tempVal = $('#' + obj.netId)[0].getElementsByTagName("button")[1];
+            tempVal.addEventListener("contextmenu", function() {
+              var left = arguments[0].clientX;
+              var top = arguments[0].clientY;
+              netIdToRemove = obj.netId
+              menuBox = window.document.querySelector(".menu");
+              menuBox.style.left = left + "px";
+              menuBox.style.top = top + "px";
+              menuBox.style.display = "block";
+
+              arguments[0].preventDefault();
+
+              menuDisplayed = true;
+            }, false);
+            console.log(tempVal);
         });
 
     }
@@ -3001,6 +3017,40 @@ function removePerson(user) {
 function dequeuePerson(user) {
     var userInfo = {
         username: user
+    };
+    spin('removeButton' + user);
+
+    var success = function(data) {
+        removeSpinner('removeButton' + user);
+        updateUI(data);
+    };
+    var error = function(data) {
+        console.log(data);
+    };
+
+    postData(userInfo, "/finishHelping.php", success, error);
+}
+
+function removeNormal() {
+    var userInfo = {
+        username: netIdToRemove
+    };
+    spin('removeButton' + user);
+
+    var success = function(data) {
+        removeSpinner('removeButton' + user);
+        updateUI(data);
+    };
+    var error = function(data) {
+        console.log(data);
+    };
+
+    postData(userInfo, "/finishHelping.php", success, error);
+}
+
+function removeFree() {
+    var userInfo = {
+        username: netIdToRemove
     };
     spin('removeButton' + user);
 
