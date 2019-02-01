@@ -2866,7 +2866,7 @@ function updateUI(data) {
             // }
             // else // currently getting help
             // {
-            output = '<div class="row myRow gettingHelpRow" id="' + obj.netId + '">' + '<div class="col-xs-3">' + obj.name + '<br/>(Being helped by: ' + convertNetIdToName(obj.beingHelpedBy) + ')</div>' + questionColumn + '<div class="col-xs-2">' + getTimeDifference(parseInt(obj.startedGettingHelpTime)) + '</div>' + '<div class="col-xs-2"><section contextmenu="dequeueMenu"><menu type="context" id="dequeueMenu"><menuitem label="Remove" onclick=dequeuePerson(\'' + obj.netId + '\')></menuitem><menuitem label="Remove but don\'t count" onClick="=dequeuePersonFree(\'' + obj.netId + '\')"></menuitem></menu><button id="removeButton' + obj.netId + '" onClick=dequeuePerson(\'' + obj.netId + '\') class="btn btn-danger btn-lg fa fa-times"> Remove' + '</button></section></div></div>';
+            output = '<div class="row myRow gettingHelpRow" id="' + obj.netId + '">' + '<div class="col-xs-3">' + obj.name + '<br/>(Being helped by: ' + convertNetIdToName(obj.beingHelpedBy) + ')</div>' + questionColumn + '<div class="col-xs-2">' + getTimeDifference(parseInt(obj.startedGettingHelpTime)) + '</div>' + '<div class="col-xs-2"><button id="removeButton' + obj.netId + '" onClick=dequeuePerson("' + obj.netId + '") class="btn btn-danger btn-lg fa fa-times"> Remove' + '</button></div></div>';
             // }
             $('#helped').append(output);
             var tempVal = $('#' + obj.netId)[0].getElementsByTagName("button")[1];
@@ -3016,7 +3016,8 @@ function removePerson(user) {
 
 function dequeuePerson(user) {
     var userInfo = {
-        username: user
+        username: user,
+        conceptual: false
     };
     spin('removeButton' + user);
 
@@ -3033,7 +3034,8 @@ function dequeuePerson(user) {
 
 function removeNormal() {
     var userInfo = {
-        username: netIdToRemove
+        username: netIdToRemove,
+        conceptual: false
     };
     spin('removeButton' + user);
 
@@ -3050,7 +3052,8 @@ function removeNormal() {
 
 function removeFree() {
     var userInfo = {
-        username: netIdToRemove
+        username: netIdToRemove,
+        conceptual: true
     };
     spin('removeButton' + user);
 
@@ -3061,7 +3064,6 @@ function removeFree() {
     var error = function(data) {
         console.log(data);
     };
-
     postData(userInfo, "/finishHelping.php", success, error);
 }
 

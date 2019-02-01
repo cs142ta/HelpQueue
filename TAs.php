@@ -179,7 +179,7 @@ if ($isTA) {
          <div class="container" id="queue">
             <!-- MAIN QUEUE PAGE -->
             <div class="row">
-               <div class="col-xs-2">
+               <div class="col-xs-3">
                   <strong>Name</strong>
                </div>
                <div class="col-xs-5">
@@ -187,9 +187,6 @@ if ($isTA) {
                </div>
                <div class="col-xs-2">
                   <strong>Time</strong>
-               </div>
-               <div class="col-xs-1">
-                 <strong>Conceptual?</strong>
                </div>
                <div class="col-xs-2">
                   <strong>Action</strong>

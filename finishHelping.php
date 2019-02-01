@@ -1,6 +1,6 @@
 <?php
 
-	if(isset($_POST["username"]))
+	if(isset($_POST["username"]) && isset($_POST["conceptual"]))
 	{
 		//see if the person is already on the list. if so proceed other wise return "user not on list"
 
@@ -11,7 +11,7 @@
 		//ELSE	see if the logged in user is on the TA table
 			//if yes then increment their counter and remove from the list
 		require_once "DBConnect.php";
-		echo json_encode(finishHelping($_POST["username"]));
+		echo json_encode(finishHelping($_POST["username"], $_POST["conceptual"]));
 
 		//echo json_encode(array("status"=>"success", "user"=>$user, "spot"=>"6");
 	}

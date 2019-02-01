@@ -194,7 +194,7 @@ function verifyStudentInputToggleButton() {
         removeSpinner("getHelpButton");
         removeSpinner("getHelpButtonNoQuestion");
         removeSpinner("passOffButtonNoQuestion");
-        console.log(theQuestion);
+        // console.log(theQuestion);
         if ((theQuestion.length > 0 && $("#roomSelector").val() != "invalid")|| passOff) {
             //enable the get in line button
             $("#getHelpButton").removeAttr('disabled');
