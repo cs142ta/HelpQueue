@@ -31,6 +31,9 @@ var flashTitleBool = false;
 var showNotifBool = false;
 var currentlyGettingHelp = false;
 var adjustTimeModalOpen = false;
+var menuDisplayed = false;
+var menuBox = null;
+var netIdToRemove = "";
 
 //count the time waiting
 setInterval(function() {
@@ -2134,6 +2137,38 @@ $(function() {
 
     });
 
+    $("#changeMOTDBtn").on("click", function() {
+        $("#motdChangeModal").modal({
+            backdrop: 'static',
+            keyboard: false
+        });
+    });
+
+    $("#motdSubmit").on("click", function() {
+        var modtIn = $("#motdInput").val();
+        var motdLink = $("#motdLinkInput").val();
+        if (modtIn.length <= 0) {
+            alert("Please enter a MOTD");
+        } else {
+            $('#motdChangeModal').modal('hide');
+            var obj = {
+                motd: modtIn,
+                motdLink: motdLink
+            };
+
+            var success = function(data) {
+              updateUI({
+                  settings: data
+              });
+            };
+            var error = function(data) {
+            };
+
+            $("#motdInput").val("");
+            postData(obj, "/changeMOTD.php", success, error);
+        }
+    });
+
     $("#changePassOffHighlighColorBtn").on("click", function() {
         $("#changePassOffHighlighColorModal").modal();
         $(".passOffSelector").on('click', function() {
@@ -2431,6 +2466,11 @@ function updateUI(data) {
                         originalTitle = value + " Help Queue";
                         document.title = value + " Help Queue";
                     }
+                }
+                if (key === "motd")
+                {
+                  $("#currentMOTD").empty();
+                  $("#currentMOTD").html(value);
                 }
                 if (key === "notifyThreshold") {
                     notifyThresholdNum = value;
@@ -2826,9 +2866,24 @@ function updateUI(data) {
             // }
             // else // currently getting help
             // {
-            output = '<div class="row myRow gettingHelpRow" id="' + obj.netId + '">' + '<div class="col-xs-3">' + obj.name + '<br/>(Being helped by: ' + convertNetIdToName(obj.beingHelpedBy) + ')</div>' + questionColumn + '<div class="col-xs-2">' + getTimeDifference(parseInt(obj.startedGettingHelpTime)) + '</div>' + '<div class="col-xs-2"><button id="removeButton' + obj.netId + '" onClick=dequeuePerson(\'' + obj.netId + '\') class="btn btn-danger btn-lg fa fa-times"> Remove' + '</button></div></div>';
+            output = '<div class="row myRow gettingHelpRow" id="' + obj.netId + '">' + '<div class="col-xs-3">' + obj.name + '<br/>(Being helped by: ' + convertNetIdToName(obj.beingHelpedBy) + ')</div>' + questionColumn + '<div class="col-xs-2">' + getTimeDifference(parseInt(obj.startedGettingHelpTime)) + '</div>' + '<div class="col-xs-2"><button id="removeButton' + obj.netId + '" onClick=dequeuePerson("' + obj.netId + '") class="btn btn-danger btn-lg fa fa-times"> Remove' + '</button></div></div>';
             // }
             $('#helped').append(output);
+            var tempVal = $('#' + obj.netId)[0].getElementsByTagName("button")[1];
+            tempVal.addEventListener("contextmenu", function() {
+              var left = arguments[0].clientX;
+              var top = arguments[0].clientY;
+              netIdToRemove = obj.netId
+              menuBox = window.document.querySelector(".menu");
+              menuBox.style.left = left + "px";
+              menuBox.style.top = top + "px";
+              menuBox.style.display = "block";
+
+              arguments[0].preventDefault();
+
+              menuDisplayed = true;
+            }, false);
+            console.log(tempVal);
         });
 
     }
@@ -2961,7 +3016,8 @@ function removePerson(user) {
 
 function dequeuePerson(user) {
     var userInfo = {
-        username: user
+        username: user,
+        conceptual: false
     };
     spin('removeButton' + user);
 
@@ -2973,6 +3029,41 @@ function dequeuePerson(user) {
         console.log(data);
     };
 
+    postData(userInfo, "/finishHelping.php", success, error);
+}
+
+function removeNormal() {
+    var userInfo = {
+        username: netIdToRemove,
+        conceptual: false
+    };
+    spin('removeButton' + user);
+
+    var success = function(data) {
+        removeSpinner('removeButton' + user);
+        updateUI(data);
+    };
+    var error = function(data) {
+        console.log(data);
+    };
+
+    postData(userInfo, "/finishHelping.php", success, error);
+}
+
+function removeFree() {
+    var userInfo = {
+        username: netIdToRemove,
+        conceptual: true
+    };
+    spin('removeButton' + user);
+
+    var success = function(data) {
+        removeSpinner('removeButton' + user);
+        updateUI(data);
+    };
+    var error = function(data) {
+        console.log(data);
+    };
     postData(userInfo, "/finishHelping.php", success, error);
 }
 
@@ -3158,8 +3249,6 @@ function postData(userName, handle) {
 }
 
 function postData(userName, handle, callBackSuccess, callBackError) {
-
-
     $.ajax({
         url: window.location.origin + addressBase + handle,
         type: 'post',
@@ -3168,6 +3257,7 @@ function postData(userName, handle, callBackSuccess, callBackError) {
         error: callBackError,
         data: userName
     });
+    console.log(userName);
 }
 
 Chart.types.Bar.extend({

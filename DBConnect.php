@@ -267,7 +267,7 @@
 					$result->finalize();
 					$stmt->close();
 
-					$queueAbuseData = "SELECT COUNT(*) AS COUNT FROM QUEUEHISTORY WHERE NetId = :netId and removedBy is not :helper and enqueueTime >= :curTime";
+					$queueAbuseData = "SELECT COUNT(*) AS COUNT FROM QUEUEHISTORY WHERE NetId = :netId and removedBy is not :helper and enqueueTime >= :curTime and conceptualQuestion is not 'true'";
 					$queueAbuseStmt = $db->prepare($queueAbuseData);
 					$queueAbuseStmt->bindValue(':netId', $userId);
 					$queueAbuseStmt->bindValue(':helper', $userId);
@@ -278,7 +278,7 @@
 					$result->finalize();
 					$queueAbuseStmt->close();
 
-					$queueAbuseData = "SELECT COUNT(*) AS COUNT FROM QUEUEHISTORY WHERE NetId = :netId and removedBy is not :helper and enqueueTime >= :curTime";
+					$queueAbuseData = "SELECT COUNT(*) AS COUNT FROM QUEUEHISTORY WHERE NetId = :netId and removedBy is not :helper and enqueueTime >= :curTime  and conceptualQuestion is not 'true'";
 					$queueAbuseStmt = $db->prepare($queueAbuseData);
 					$queueAbuseStmt->bindValue(':netId', $userId);
 					$queueAbuseStmt->bindValue(':helper', $userId);
@@ -378,7 +378,7 @@
 		return $questionsPerWeek != -1;
 	}
 
-	function finishHelping($userIdToRemove)
+	function finishHelping($userIdToRemove, $isConceptual)
 	{
 		try
 		{
@@ -453,7 +453,7 @@
 					// }
 					// else //remove them from the queue and update the history
 					// {
-					dequeueHelperForTa($db, $userIdToRemove, $enqueueDetails["beingHelpedBy"], $enqueueDetails);
+					dequeueHelperForTaConceptual($db, $userIdToRemove, $enqueueDetails["beingHelpedBy"], $enqueueDetails, $isConceptual);
 					// }
 					$avgs = getAverages($db);
 					$arrayToReturn = array("status"=>"success", "list"=>getQueue($db), "helped"=>getHelped($db), "avgs"=>$avgs);
@@ -591,6 +591,11 @@
 
 	function dequeueHelperForTa($db, $userIdToRemove, $thisUsersID, $enqueueDetails)
 	{
+		dequeueHelperForTaConceptual($db, $userIdToRemove, $thisUsersID, $enqueueDetails, false);
+	}
+
+	function dequeueHelperForTaConceptual($db, $userIdToRemove, $thisUsersID, $enqueueDetails, $isConceptual)
+	{
 		//remove the student from the queue (a trigger will update everyone elses spot in line)
 		$removeStudentSQL = "DELETE FROM QUEUE WHERE NetId = :netId";
 		$removeStudentStmt = $db->prepare($removeStudentSQL);
@@ -624,7 +629,7 @@
 			$incrementStudentCounterStmt->execute();
 			$incrementStudentCounterStmt->close();
 
-			insertHistory($db, $userIdToRemove, $thisUsersID, $enqueueDetails);
+			insertHistoryConceptual($db, $userIdToRemove, $thisUsersID, $enqueueDetails, $isConceptual);
 		}
 	}
 
@@ -648,8 +653,13 @@
 
 	function insertHistory($db, $netId, $removedBy, $enqueueDetails)
 	{
+		insertHistoryConceptual($db, $netId, $removedBy, $enqueueDetails, false);
+	}
 
-		$insertHistory = "Insert Into QUEUEHISTORY (NetId, removedBy, enqueueTime, dequeueTime, QUESTION, PASSOFF, DoneGettingHelpTime) VALUES (:netId, :removedBy, :enqueueTime, :dequeueTime, :question, :passoff, :doneGettingHelpTime)";
+	function insertHistoryConceptual($db, $netId, $removedBy, $enqueueDetails, $isConceptual)
+	{
+
+		$insertHistory = "Insert Into QUEUEHISTORY (NetId, removedBy, enqueueTime, dequeueTime, QUESTION, PASSOFF, DoneGettingHelpTime, conceptualQuestion) VALUES (:netId, :removedBy, :enqueueTime, :dequeueTime, :question, :passoff, :doneGettingHelpTime, :isConceptual)";
 
 		$dequeueHistoryStmt = $db->prepare($insertHistory);
 		$dequeueHistoryStmt->bindValue(':netId', $netId);
@@ -661,6 +671,7 @@
 		$dequeueHistoryStmt->bindValue(':passoff', $enqueueDetails["passOff"]);
 		//if startedGettingHelpTime is null they didn't get help so just put null here, other wise put in the current time
 		$dequeueHistoryStmt->bindValue(':doneGettingHelpTime', ($enqueueDetails["startedGettingHelpTime"] == null ? $enqueueDetails["startedGettingHelpTime"] : time()*1000));
+		$dequeueHistoryStmt->bindValue(':isConceptual', $isConceptual);
 		$dequeueHistoryStmt->execute();
 		$dequeueHistoryStmt->close();
 
@@ -744,7 +755,7 @@
 		$result->finalize();
 		$stmt->close();
 
-		$queueAbuseData = "SELECT COUNT(*) AS COUNT FROM QUEUEHISTORY WHERE NetId = :netId and removedBy is not :helper and enqueueTime >= :curTime";
+		$queueAbuseData = "SELECT COUNT(*) AS COUNT FROM QUEUEHISTORY WHERE NetId = :netId and removedBy is not :helper and enqueueTime >= :curTime and conceptualQuestion is not 'true'";
 		$queueAbuseStmt = $db->prepare($queueAbuseData);
 		$queueAbuseStmt->bindValue(':netId', $userId);
 		$queueAbuseStmt->bindValue(':helper', $userId);
@@ -755,7 +766,7 @@
 		$result->finalize();
 		$queueAbuseStmt->close();
 
-		$queueAbuseData = "SELECT COUNT(*) AS COUNT FROM QUEUEHISTORY WHERE NetId = :netId and removedBy is not :helper and enqueueTime >= :curTime";
+		$queueAbuseData = "SELECT COUNT(*) AS COUNT FROM QUEUEHISTORY WHERE NetId = :netId and removedBy is not :helper and enqueueTime >= :curTime and conceptualQuestion is not 'true'";
 		$queueAbuseStmt = $db->prepare($queueAbuseData);
 		$queueAbuseStmt->bindValue(':netId', $userId);
 		$queueAbuseStmt->bindValue(':helper', $userId);
@@ -912,6 +923,79 @@
 			unset($db);
 		}
 		return $listToReturn;
+	}
+
+	function isMOTDLink()
+	{
+		$db = new MyDB();
+		$db->exec("BEGIN");
+		$sql = "SELECT value FROM SETTINGS WHERE name='motdLink'";
+		$stmt = $db->prepare($sql);
+		$result = $stmt->execute();
+		$value = $result->fetchArray(SQLITE3_ASSOC);
+		$result->finalize();
+		$stmt->close();
+		$db->close();
+		unset($db);
+		return ($value['value'] != "");
+	}
+
+	function getMOTDLink()
+	{
+		$db = new MyDB();
+		$db->exec("BEGIN");
+		$sql = "SELECT value FROM SETTINGS WHERE name='motdLink'";
+		$stmt = $db->prepare($sql);
+		$result = $stmt->execute();
+		$value = $result->fetchArray(SQLITE3_ASSOC);
+		$result->finalize();
+		$stmt->close();
+		$db->close();
+		unset($db);
+		return $value['value'];
+	}
+
+	function getMOTD()
+	{
+		$db = new MyDB();
+		$db->exec("BEGIN");
+		$sql = "SELECT value FROM SETTINGS WHERE name='motd'";
+		$stmt = $db->prepare($sql);
+		$result = $stmt->execute();
+		$value = $result->fetchArray(SQLITE3_ASSOC);
+		$result->finalize();
+		$stmt->close();
+		$db->close();
+		unset($db);
+		return $value["value"];
+	}
+
+	function setMOTD($motd)
+	{
+			$db = new MyDB();
+			$db->exec("BEGIN");
+			$sql = "UPDATE SETTINGS SET value = :msg WHERE name = 'motd'";
+			$stmt = $db->prepare($sql);
+			$stmt->bindValue(":msg", $motd);
+			$stmt->execute();
+			$stmt->close();
+			$db->exec("COMMIT");
+			$db->close();
+			unset($db);
+	}
+
+	function setMOTDLink($link)
+	{
+		$db = new MyDB();
+		$db->exec("BEGIN");
+		$sql2 = "UPDATE SETTINGS SET value = :link WHERE name ='motdLink'";
+		$stmt2 = $db->prepare($sql2);
+		$stmt2->bindValue(":link", $link);
+		$stmt2->execute();
+		$stmt2->close();
+		$db->exec("COMMIT");
+		$db->close();
+		unset($db);
 	}
 
 	function getStats()
@@ -1298,7 +1382,7 @@
 		}
 		else
 		{
-			$toReturn = array('status'=>'error', 'name'=>'error');
+			$toReturn = array('status'=>'error', 'name'=> null);
 		}
 		$result->finalize();
 		$stmt->close();
@@ -1432,20 +1516,20 @@
 
 	function changeSetting($keyIn, $valueIn)
 	{
-		$db = new MyDB();
-		$db->exec("BEGIN");
-		$sql = "UPDATE SETTINGS SET value = :valueIn WHERE name = :keyIn";
-		$stmt = $db->prepare($sql);
-		$stmt->bindValue(":valueIn", $valueIn);
-		$stmt->bindValue(":keyIn", $keyIn);
+			$db = new MyDB();
+			$db->exec("BEGIN");
+			$sql = "UPDATE SETTINGS SET value = :valueIn WHERE name = :keyIn";
+			$stmt = $db->prepare($sql);
+			$stmt->bindValue(":valueIn", $valueIn);
+			$stmt->bindValue(":keyIn", $keyIn);
 
-		$result = $stmt->execute();
+			$result = $stmt->execute();
 
-		$result->finalize();
-		$stmt->close();
-		$db->exec("COMMIT");
-		$db->close();
-		unset($db);
+			$result->finalize();
+			$stmt->close();
+			$db->exec("COMMIT");
+			$db->close();
+			unset($db);
 		//return array($key=>$value);
 		return getSettings();
 	}
