@@ -151,6 +151,14 @@ else if ($auth){
   <p style="padding-left:10px; padding-top:30px;">
     <ul>
       <li>You are currently logged in as: <b><?php echo phpCAS::getUser(); ?></b>.</li>
+      <?php if(!$isThisATA){ ?>
+        <?php require_once 'DBConnect.php'; if(shouldLimitDaily()){?>
+          <li>You have <b><span id="questionsRemainingDay"></span> of <span id="questionsDaily"></span></b> daily questions remaining</li>
+        <?php }?>
+        <?php require_once 'DBConnect.php'; if(shouldLimitWeekly()){?>
+          <li>You have <b><span id="questionsRemainingWeek"></span> of <span id="questionsWeekly"></span></b> weekly questions remaining</li>
+        <?php }?>
+      <?php }?>
       <li>The current average wait time for the top <span id="topCount"></span> people on the queue is <span id="topAvg"></span></li>
       <li>The current length of the queue is <span id="queueLen"></span>.</li>
       <li>The current number of people being helped is <span id="currentlyBeingHelped"></span>.</li>

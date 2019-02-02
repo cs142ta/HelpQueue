@@ -2384,8 +2384,34 @@ function updateUI(data) {
                         $("#questionsNotRequired").show();
                     }
                 }
+                if (key == "questionsPerDay")
+                {
+                  $(".questionsPerDay").empty();
+                  $("#questionsDaily").empty();
+                  $("#questionsDaily").append(value);
+                  $(".questionsPerDay").html(value);
+                }
+                if (key == "questionsPerWeek")
+                {
+                  $(".questionsPerWeek").empty();
+                  $("#questionsWeekly").empty();
+                  $("#questionsWeekly").append(value);
+                  $(".questionsPerWeek").html(value);
+                }
             });
         });
+    }
+
+    if (data.hasOwnProperty("questionStatus"))
+    {
+      $("#questionsRemainingDay").empty();
+      $("#questionsRemainingWeek").empty();
+      // $("#questionsWeekly").empty();
+      // $("#questionsDaily").empty();
+      $("#questionsRemainingDay").append(data.questionStatus.questionsRemainingDay);
+      $("#questionsRemainingWeek").append(data.questionStatus.questionsRemainingWeek);
+      // $("#questionsWeekly").append(data.questionStatus.questionsWeekly);
+      // $("#questionsDaily").append(data.questionStatus.questionsDaily);
     }
 
     if (data.hasOwnProperty("status") && data.status === "loggedOut") {

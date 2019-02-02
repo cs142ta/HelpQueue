@@ -740,7 +740,6 @@
 
 	function getQuestionStatus($db, $userId)
 	{
-
 		$stmt = "SELECT value from SETTINGS WHERE name = 'questionsPerDay'";
 		$stmt = $db->prepare($stmt);
 		$result = $stmt->execute();
@@ -755,7 +754,7 @@
 		$result->finalize();
 		$stmt->close();
 
-		$queueAbuseData = "SELECT COUNT(*) AS COUNT FROM QUEUEHISTORY WHERE NetId = :netId and removedBy is not :helper and enqueueTime >= :curTime and conceptualQuestion is not 'true'";
+		$queueAbuseData = "SELECT COUNT(*) AS COUNT FROM QUEUEHISTORY WHERE NetId is :netId and removedBy is not :helper and enqueueTime >= :curTime and conceptualQuestion is not 'true'";
 		$queueAbuseStmt = $db->prepare($queueAbuseData);
 		$queueAbuseStmt->bindValue(':netId', $userId);
 		$queueAbuseStmt->bindValue(':helper', $userId);
@@ -766,7 +765,7 @@
 		$result->finalize();
 		$queueAbuseStmt->close();
 
-		$queueAbuseData = "SELECT COUNT(*) AS COUNT FROM QUEUEHISTORY WHERE NetId = :netId and removedBy is not :helper and enqueueTime >= :curTime and conceptualQuestion is not 'true'";
+		$queueAbuseData = "SELECT COUNT(*) AS COUNT FROM QUEUEHISTORY WHERE NetId is :netId and removedBy is not :helper and enqueueTime >= :curTime and conceptualQuestion is not 'true'";
 		$queueAbuseStmt = $db->prepare($queueAbuseData);
 		$queueAbuseStmt->bindValue(':netId', $userId);
 		$queueAbuseStmt->bindValue(':helper', $userId);
@@ -776,7 +775,6 @@
 		$timesInPreviousWeek = $timesInPreviousWeek["COUNT"];
 		$result->finalize();
 		$queueAbuseStmt->close();
-
 		$dailyQuestionsRemaining = $questionsPerDay - $timesInPreviousDay;
 		$weeklyQuestionsRemaining = $questionsPerWeek - $timesInPreviousWeek;
 		return array("questionsRemainingDay"=>$dailyQuestionsRemaining, "questionsRemainingWeek"=>$weeklyQuestionsRemaining);
