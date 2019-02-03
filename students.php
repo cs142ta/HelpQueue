@@ -104,13 +104,15 @@ else if ($auth){
           <input class="form-control" type="text" id="questionInput" placeholder="Enter your question here" maxlength="200">
         <span style="float:left; font-size:75%;" id="questionInputLengthLeft">200 characters remaining</span></div>
         <div class="col-xs-1" style="width:20%;vertical-align:middle;">
-            <select id="roomSelector">
+          <strong>
+            <select id="roomSelector" style="height:34px">
                 <option selected hidden value="invalid">ROOM #</option>
                 <option value="1119">1119</option>
                 <option value="1121">1121</option>
                 <option value="1138">1138</option>
                 <option value="1102">1102</option>
             </select>
+          </strong>
         <div>
     </div>
 
