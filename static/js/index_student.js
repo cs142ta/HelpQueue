@@ -2509,7 +2509,7 @@ function updateUI(data) {
                         $("#getHelpButtonNoQuestion").html("Get out of line");
                     } else {
                         $("#getHelpButtonNoQuestion").html("Be done getting help");
-                        $("#passOffButtonNoQuestion").html("You are currently being helped");
+                        $("#passOffButtonNoQuestion").html("You are currently being helped by" + data.beingHelpedBy + "");
                     }
 
                 }
@@ -2521,7 +2521,7 @@ function updateUI(data) {
                     $("#queueNum").html('You are currently the <strong>' + spot + postfix + '</strong> in line to get help');
                 } else {
                     $("#getHelpButton").html("Done getting help");
-                    $("#queueNum").html('<strong>You are currently being helped</strong>');
+                    $("#queueNum").html('<strong>You are currently being helped by ' + data.beingHelpedBy + '</strong>'); //
                 }
                 helpButtonHandle = "/removeFromQueue.php";
                 removeSpinner("getHelpButton");

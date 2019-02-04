@@ -798,7 +798,8 @@
 
 		if($row = $result->fetchArray(SQLITE3_ASSOC) )
 		{
-			$itemInQueue = array("status"=>"success", "userId"=>$row["NetId"], "name"=>$row["name"], "spot"=>$row["QUEUENUM"], "enqueueTime"=>$row["ENQUEUETIME"], "helpScore"=>$row["Counter"],"settings"=>$settings, "avgs"=>$avgs, "questionStatus"=>$questionStatus, "question"=>$row["QUESTION"], "passOff"=>$row["PASSOFF"], "startedGettingHelpTime"=>$row["STARTEDGETTINGHELPTIME"], "beingHelpedBy"=>$row["BeingHelpedBy"]);
+			$TAName = getNameStatus($row["BeingHelpedBy"])["name"];
+			$itemInQueue = array("status"=>"success", "userId"=>$row["NetId"], "name"=>$row["name"], "spot"=>$row["QUEUENUM"], "enqueueTime"=>$row["ENQUEUETIME"], "helpScore"=>$row["Counter"],"settings"=>$settings, "avgs"=>$avgs, "questionStatus"=>$questionStatus, "question"=>$row["QUESTION"], "passOff"=>$row["PASSOFF"], "startedGettingHelpTime"=>$row["STARTEDGETTINGHELPTIME"], "beingHelpedBy"=>$TAName);
 		}
 		else
 		{
