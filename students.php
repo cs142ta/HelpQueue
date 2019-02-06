@@ -97,7 +97,7 @@ else if ($auth){
       <div id="questionsRequired">	<!-- This is for when questions are required -->
         <!--<div class="col-xs-9"> -->
         <div class="col-xs-12">
-          <h1 style="font-size:250%;"><strong><?php if(isMOTDLink()){ echo ("<a href='".getMOTDLink()."'>");}?><?php echo getMOTD()?><?php if (isMOTDLink()) {echo "</a>";}?></strong></h1>
+          <h1 style="font-size:750%;"><strong><u><?php if(isMOTDLink()){ echo ("<a href='".getMOTDLink()."'>");}?><?php echo getMOTD()?><?php if (isMOTDLink()) {echo "</a>";}?></u></strong></h1>
 
           <div class="row">
         <div class="col-xs-1" style="width:80%;">

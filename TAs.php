@@ -309,6 +309,22 @@ if ($isTA) {
                </div>
             </div>
             <div class="row settingsRow">
+    					<div class="col-xs-9">
+    						Change the number of questions students can ask per day: <span class="questionsPerDay"> </span> questions
+    					</div>
+    					<div class="col-xs-3">
+    					 	<button id="changeQuestionsPerDayBtn" class="btn btn-warning fa fa-edit"></button>
+    					</div>
+    				</div>
+            <div class="row settingsRow">
+    					<div class="col-xs-9">
+    						Change the number of questions students can ask per week: <span class="questionsPerWeek"> </span> questions
+    					</div>
+    					<div class="col-xs-3">
+    					 	<button id="changeQuestionsPerWeekBtn" class="btn btn-warning fa fa-edit"></button>
+    					</div>
+    				</div>
+            <div class="row settingsRow">
               <div class="col-xs-9">
                  Current message of the day:  <span id="currentMOTD"> </span>
               </div>
@@ -678,6 +694,50 @@ if ($isTA) {
             </div>
          </div>
       </div>
+      <div class="modal fade" id="changeQuestionPerDayModal" role="dialog">
+  			<div class="modal-dialog">
+  			  <!-- Modal content-->
+  			  <div class="modal-content">
+  				<div class="modal-header">
+  				  <h4 class="modal-title">How many questions per day?</h4>
+  				</div>
+  				<div class="modal-body">
+  					<center>
+  				  <p>How many questions should students be allowed to ask per day? (-1 means no limit)
+  				  </p>
+  					<input type="text" id="changeQuestionPerDayInput" placeholder="Enter value here" width="70%"></input>
+  					</center>
+  				</div>
+  				<div class="modal-footer">
+  				  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+  				  <button type="button" class="btn btn-success" id="changeQuestionPerDaySubmit">Submit</button>
+  				</div>
+  			  </div>
+  			</div>
+		  </div>
+      <div class="modal fade" id="changeQuestionPerWeekModal" role="dialog">
+  			<div class="modal-dialog">
+
+  			  <!-- Modal content-->
+  			  <div class="modal-content">
+  				<div class="modal-header">
+  				  <h4 class="modal-title">How many questions per week?</h4>
+  				</div>
+  				<div class="modal-body">
+  					<center>
+  				  <p>How many questions should students be allowed to ask per week? (-1 means no limit)
+  				  </p>
+  					<input type="text" id="changeQuestionPerWeekInput" placeholder="Enter value here" width="70%"></input>
+  					</center>
+  				</div>
+  				<div class="modal-footer">
+  				  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+  				  <button type="button" class="btn btn-success" id="changeQuestionPerWeekSubmit">Submit</button>
+  				</div>
+  			  </div>
+
+  			</div>
+		  </div>
       <!-- <div class="modal fade" id="changeAutoTimesModal" role="dialog"> -->
          <!-- <div class="modal-dialog"> -->
             <!-- Modal content-->
