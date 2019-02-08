@@ -31,6 +31,7 @@ var flashTitleBool = false;
 var showNotifBool = false;
 var currentlyGettingHelp = false;
 var adjustTimeModalOpen = false;
+var changeMOTDModalOpen = false;
 var menuDisplayed = false;
 var menuBox = null;
 var netIdToRemove = "";
@@ -2138,6 +2139,7 @@ $(function() {
     });
 
     $("#changeMOTDBtn").on("click", function() {
+      changeMOTDModalOpen=true;
         $("#motdChangeModal").modal({
             backdrop: 'static',
             keyboard: false
@@ -2150,6 +2152,7 @@ $(function() {
         if (modtIn.length <= 0) {
             alert("Please enter a MOTD");
         } else {
+            changeMOTDModalOpen=false;
             $('#motdChangeModal').modal('hide');
             var obj = {
                 motd: modtIn,
@@ -2467,10 +2470,15 @@ function updateUI(data) {
                         document.title = value + " Help Queue";
                     }
                 }
-                if (key === "motd")
+                if (key === "motd" && !changeMOTDModalOpen)
                 {
                   $("#currentMOTD").empty();
                   $("#currentMOTD").html(value);
+                  $("#motdInput").val(value);
+                }
+                if (key === "motdLink" && !changeMOTDModalOpen)
+                {
+                  $("#motdLinkInput").val(value);
                 }
                 if (key === "notifyThreshold") {
                     notifyThresholdNum = value;
@@ -2883,7 +2891,7 @@ function updateUI(data) {
 
               menuDisplayed = true;
             }, false);
-            console.log(tempVal);
+            // console.log(tempVal);
         });
 
     }
