@@ -60,17 +60,17 @@ th, td
 	border-left:2px solid black;
 }
 
-.aSquare {   
-	position:relative;
+.aSquare {
+		position:relative;
     float: left;
     width: 20px;
     height: 20px;
     margin: 5px;
-	margin-top:0px;
+		margin-top:0px;
     border-width: 1px;
     border-style: solid;
     border-color: rgba(0,0,0,.2);
-	cursor:pointer;
+		cursor:pointer;
 }
 
 .graphRawDataTh
@@ -83,4 +83,25 @@ th, td
 	background-color:#DEDEDE
 }
 
+.queue{
+	padding: 0 15px;
+}
+/*change to main-queue for the zoom help queue and secondary-queue for the in lab help queue*/
+.main-queue{
+	border-right: solid 2px;
+}
 
+.super_container{
+	display: flex;
+	width: unset;
+	border-bottom: solid black 2px;
+}
+
+.queue-row{
+	margin-right: unset;
+	margin-left: unset;
+}
+
+.offer-help-button{
+	margin-left: -22px
+}

@@ -28,6 +28,7 @@ var pauseUpdate = false;
 // var originalTitle;
 var timeout;
 var flashTitleBool = false;
+const queueId = window.location.pathname.split("/")[2].split("-")[0]
 // var showNotifBool = false;
 // var currentlyGettingHelp = false;
 
@@ -1659,6 +1660,8 @@ $(function() {
             {
               poll = true;
             }
+
+            console.log("queueId = " + queueId);
             submitRequest(user, roomNumber + " - " + theQuestion, passOff);
           }
           else {
@@ -1688,7 +1691,8 @@ $(function() {
         var userInfo = {
             username: user,
             question: theQuestion,
-            passOff: passOff
+            passOff: passOff,
+            queueId: queueId
         };
 
         var success = function(data) {
@@ -2345,13 +2349,19 @@ function updateUI(data) {
                             keyboard: false
                         });
                     } else {
-                        $("#courseTitle").empty();
-                        $("#courseTitle").html(value);
-                        $("#courseTitleField").empty();
-                        $("#courseTitleField").html(value);
+                      var labTitle = value
+                      if (window.location.pathname.split("/")[2].split("-")[0] === "zoom")
+                      {
+                        labTitle = labTitle.replace("In Lab", "Zoom").replace("in Lab", "Zoom").replace("in lab", "Zoom").replace("in-lab", "Zoom").replace("In-Lab", "Zoom").replace("Lab", "Zoom").replace("lab", "zoom")
+                      }
 
-                        originalTitle = value + " Help Queue";
-                        document.title = value + " Help Queue";
+                        $("#courseTitle").empty();
+                        $("#courseTitle").html(labTitle);
+                        $("#courseTitleField").empty();
+                        $("#courseTitleField").html(labTitle);
+
+                        originalTitle = labTitle + " Help Queue";
+                        document.title = labTitle + " Help Queue";
                     }
                 }
                 if (key === "notifyThreshold") {
@@ -2421,7 +2431,7 @@ function updateUI(data) {
             alert("ERROR: " + data.message);
             //set up page for 'not in line' status
             helpButtonHandle = "/queueUp.php";
-            poll = false;
+            poll = true;
             currentSpotInLine = -1;
             $("#questionInput").removeAttr('disabled');
             $("#passOffCheckBox").removeAttr('disabled');
@@ -3013,7 +3023,7 @@ function getNameStatus() {
 //page automatically logs out, and the student sees it.
 function getStatus(userName, tryAgain) {
     $.ajax({
-        url: addressBase + '/getStatus.php?id=' + userName,
+        url: addressBase + '/getStatus.php?id=' + userName + '&queueId=' + queueId,
         type: 'get',
         dataType: 'json',
         success: function(data) {

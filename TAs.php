@@ -176,9 +176,32 @@ if ($isTA) {
       </div>
       <div style="text-align:center;">
          <h2>Welcome TA to the Help Queue</h2>
-         <div class="container" id="queue">
-            <!-- MAIN QUEUE PAGE -->
-            <div class="row">
+         <!--MAIN QUEUE PAGE-->
+         <!--SWAP THE ORDER OF THESE FOR CHANGING WHICH PAGE THIS IS FOR-->
+         <div class="super_container container" id="superqueue">
+          <div class="container queue main-queue" id="queue">
+             <h3>IN LAB</h3>
+             <div class="row queue-row">
+                <div class="col-xs-3">
+                   <strong>Name</strong>
+                </div>
+                <div class="col-xs-5">
+                   <strong>Question</strong>
+                </div>
+                <div class="col-xs-2">
+                   <strong>Time</strong>
+                </div>
+                <div class="col-xs-2">
+                   <strong>Action</strong>
+                </div>
+             </div>
+             <hr>
+             <div id="list"></div>
+             <div id="helped"></div>
+          </div>
+          <div class="container queue secondary-queue" id="other">
+            <h3>ZOOM</h3>
+            <div class="row queue-row">
                <div class="col-xs-3">
                   <strong>Name</strong>
                </div>
@@ -193,8 +216,9 @@ if ($isTA) {
                </div>
             </div>
             <hr>
-            <div id="list"></div>
-            <div id="helped"></div>
+            <div id="other_list"></div>
+            <div id="other_helped"></div>
+         </div>
          </div>
          <div class="container" id="stats">
             <!-- STATS PAGE -->
@@ -810,9 +834,13 @@ if ($isTA) {
       </p>
       <div id="sexyRexy"></div>
       <div id="easterEggTrigger" style="position:fixed; bottom:0; color:#fefefe; cursor:pointer;">Credits</div>
-      <div class="menu">
+      <div class="menu menu-main-queue">
         <div class="menu-item" onclick="removeNormal()">Remove</div>
         <div class="menu-item" onclick="removeFree()">Don't Count</div>
+      </div>
+      <div class="menu menu-other-queue">
+        <div class="menu-item" onclick="removeNormalOtherQueue()">Remove</div>
+        <div class="menu-item" onclick="removeFreeOtherQueue()">Don't Count</div>
       </div>
    </body>
 </html>

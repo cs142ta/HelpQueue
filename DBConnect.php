@@ -47,9 +47,9 @@
 		{
 			$createUsers = "CREATE TABLE IF NOT EXISTS Students(NetId TEXT Not NULL,name TEXT, Counter INT NOT NULL DEFAULT 0, PassOffCounter Integer DEFAULT 0, UNIQUE(NetId))";
 			$createTA = "CREATE TABLE IF NOT EXISTS TAS(NetId TEXT Not NULL, name TEXT, Counter INT Not NULL DEFAULT 0, PassOffCounter INT DEFAULT 0, Active Bit Default 1, UNIQUE(NetId))";
-			$createQueue = "CREATE TABLE IF NOT EXISTS QUEUE(NetId TEXT Not NULL, ENQUEUETIME INT Not NULL, QUEUENUM INT Not NULL, QUESTION TEXT, PASSOFF BIT, STARTEDGETTINGHELPTIME INT, BeingHelpedBy TEXT, UNIQUE(NetId))";
+			$createQueue = "CREATE TABLE IF NOT EXISTS QUEUE(NetId TEXT Not NULL, ENQUEUETIME INT Not NULL, QUEUENUM INT Not NULL, QUESTION TEXT, PASSOFF BIT, STARTEDGETTINGHELPTIME INT, BeingHelpedBy TEXT, queue_id STRING NOT NULL DEFAULT 'inlab', UNIQUE(NetId))";
 			$createSettings = "CREATE TABLE IF NOT EXISTS SETTINGS(name TEXT Not NULL, value TEXT NOT NULL, UNIQUE(name))";
-			$createQueueHistory = "CREATE TABLE IF NOT EXISTS QUEUEHISTORY(id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,NetId TEXT NOT NULL, removedBy TEXT NOT NULL,enqueueTime INTEGER NOT NULL,	dequeueTime INTEGER NOT NULL, QUESTION TEXT, PASSOFF Bit, DoneGettingHelpTime INTEGER)";
+			$createQueueHistory = "CREATE TABLE IF NOT EXISTS QUEUEHISTORY(id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,NetId TEXT NOT NULL, removedBy TEXT NOT NULL,enqueueTime INTEGER NOT NULL,	dequeueTime INTEGER NOT NULL, QUESTION TEXT, PASSOFF Bit, DoneGettingHelpTime INTEGER, helpedBy TEXT NOT NULL DEFAULT '', conceptualQuestion BOOLEAN, queue_id STRING NOT NULL DEFAULT 'inlab')";
 			//$onDeleteQueueTrigger = "CREATE TRIGGER IF NOT EXISTS updateRowonQueueTrigger AFTER UPDATE OF QUEUENUM ON QUEUE BEGIN UPDATE QUEUE SET QUEUENUM = QUEUENUM - 1 WHERE QUEUENUM > Old.QUEUENUM;  END;";
 			$onDeleteQueueTrigger = "CREATE TRIGGER IF NOT EXISTS deleteRowonQueueTrigger AFTER DELETE ON QUEUE BEGIN UPDATE QUEUE SET QUEUENUM = QUEUENUM - 1 WHERE QUEUENUM > Old.QUEUENUM;  END;";
 
@@ -63,7 +63,15 @@
 			$insertPassOffColor = "INSERT OR IGNORE INTO SETTINGS (name, value) VALUES ('passOffHighlightColor', 'yellow')";
 			$insertLastXMin = "INSERT OR IGNORE INTO SETTINGS (name, value) VALUES ('lastXMin', '5')";
 			$insertRequireQuestion = "INSERT OR IGNORE INTO SETTINGS (name, value) VALUES ('requireQuestion', 'true')";
-			$extendedView = "CREATE VIEW IF NOT EXISTS EXTENDEDQUEUE AS SELECT * FROM QUEUE JOIN Students USING (NetId) ORDER BY QUEUENUM";
+			$insertQuestionsPerDay = "INSERT OR IGNORE INTO SETTINGS (name, value) VALUES ('questionsPerDay', '4')";
+			$insertQuestionsPerWeek = "INSERT OR IGNORE INTO SETTINGS (name, value) VALUES ('questionsPerWeek', '-1')";
+			$insertMOTD = "INSERT OR IGNORE INTO SETTINGS (name, value) VALUES ('motd', 'Enter your question below')";
+			$insertMOTDLink = "INSERT OR IGNORE INTO SETTINGS (name, value) VALUES ('motdLink', 'https://docs.google.com/document/d/1iv0NTeHQRJWtglRjoellSI-ILkTQlUBd3k8ob9u3KzE/edit')";
+
+			$extendedView = "CREATE VIEW IF NOT EXISTS EXTENDEDQUEUE AS SELECT * FROM QUEUE JOIN Students USING (NetId) WHERE queue_id != 'zoom' ORDER BY QUEUENUM";
+			$extendedViewOther = "CREATE VIEW IF NOT EXISTS EXTENDEDOTHERQUEUE AS SELECT * FROM QUEUE JOIN Students USING (NetId) WHERE queue_id == 'zoom' ORDER BY QUEUENUM";
+			$helpedView = "CREATE VIEW IF NOT EXISTS HELPED AS SELECT * FROM QUEUE JOIN Students USING (NetId) WHERE STARTEDGETTINGHELPTIME IS NOT NULL ORDER BY QUEUENUM";
+			$waitingView = "CREATE VIEW IF NOT EXISTS WAITING AS SELECT * FROM QUEUE JOIN Students USING (NetId) WHERE STARTEDGETTINGHELPTIME IS NULL ORDER BY QUEUENUM";
 
 			$db->exec("BEGIN;");
 			$statement1 = $db->prepare($createUsers);
@@ -92,6 +100,15 @@
 			$statement4->close();
 
 			$statement7 = $db->prepare($extendedView);
+			$statement7->execute();
+			$statement7->close();
+			$statement7 = $db->prepare($extendedViewOther);
+			$statement7->execute();
+			$statement7->close();
+			$statement7 = $db->prepare($helpedView);
+			$statement7->execute();
+			$statement7->close();
+			$statement7 = $db->prepare($waitingView);
 			$statement7->execute();
 			$statement7->close();
 
@@ -126,6 +143,19 @@
 			$statement14 = $db->prepare($insertRequireQuestion);
 			$statement14->execute();
 			$statement14->close();
+			$statement14 = $db->prepare($motd);
+			$statement14->execute();
+			$statement14->close();
+			$statement14 = $db->prepare($motdLink);
+			$statement14->execute();
+			$statement14->close();
+			$statement14 = $db->prepare($insertQuestionsPerDay);
+			$statement14->execute();
+			$statement14->close();
+			$statement14 = $db->prepare($insertQuestionsPerWeek);
+			$statement14->execute();
+			$statement14->close();
+
 
 
 			$db->exec('COMMIT');
@@ -134,7 +164,7 @@
 		//return "statement1: " + var_dump($statement1);
 	}
 
-	function enqueue($userId, $question, $passOff)
+	function enqueue($userId, $question, $passOff, $queueId)
 	{
 
 		//see if queue is active
@@ -156,6 +186,7 @@
 		$findDupsStmt = $db->prepare($findDups);
 		$findDupsStmt->bindValue(':id',$userId);
 
+
 		$findDupsResult = $findDupsStmt->execute();
 
 		if($findDupsRow = $findDupsResult->fetchArray(SQLITE3_ASSOC) )
@@ -167,7 +198,13 @@
 			$db->exec("COMMIT");
 			$db->close();
 			unset($db);
-			return array("status"=>"success", "userId"=>$findDupsRow["NetId"], "spot"=>$findDupsRow["QUEUENUM"], "enqueueTime"=>$findDupsRow["ENQUEUETIME"], "question"=>$findDupsRow["QUESTION"], "passOff"=>$findDupsRow["PASSOFF"], "gettingHelpTime"=>$findDupsRow["STARTEDGETTINGHELPTIME"], "beingHelpedBy"=>$findDupsRow["BeingHelpedBy"]);
+			if ($findDupsRow["queue_id"] == $queueId)
+			{
+				return array("status"=>"success", "userId"=>$findDupsRow["NetId"], "spot"=>$findDupsRow["QUEUENUM"], "enqueueTime"=>$findDupsRow["ENQUEUETIME"], "question"=>$findDupsRow["QUESTION"], "passOff"=>$findDupsRow["PASSOFF"], "gettingHelpTime"=>$findDupsRow["STARTEDGETTINGHELPTIME"], "beingHelpedBy"=>$findDupsRow["BeingHelpedBy"]);
+			}
+			else {
+				return array("status"=>"error", "message"=>"You can only be in one queue at a time. If you would like to get into this one, please remove yourself from the other queue.");
+			}
 		}
 		else
 		{
@@ -193,10 +230,11 @@
 		}
 		$result1->finalize();
 		$statement2->close();*/
-		$getTopQueue = "SELECT MAX(QUEUENUM) AS MAXNUM FROM QUEUE";
+		$getTopQueue = "SELECT MAX(QUEUENUM) AS MAXNUM FROM QUEUE WHERE queue_id = :queueId";
 
 		//$getTopQueue = "SELECT Count(*) AS MAXNUM FROM QUEUE";
 		$statement2 = $db->prepare($getTopQueue);
+		$statement2->bindValue(":queueId", $queueId);
 		$result1 = $statement2->execute();
 
 		if($topResultRow = $result1->fetchArray(SQLITE3_ASSOC) )
@@ -300,7 +338,7 @@
 					}
 
 					//enter the data in
-					$insertData = "INSERT INTO QUEUE (NetId, ENQUEUETIME, QUEUENUM, QUESTION, PASSOFF) VALUES (:netId, :time, :spot, :question, :passoff);";
+					$insertData = "INSERT INTO QUEUE (NetId, ENQUEUETIME, QUEUENUM, QUESTION, PASSOFF, queue_id) VALUES (:netId, :time, :spot, :question, :passoff, :queueId);";
 					$insertDupsStmt = $db->prepare($insertData);
 					$insertDupsStmt->bindValue(':netId',$userId);
 					$insertDupsStmt->bindValue(':time',time()*1000);
@@ -308,6 +346,7 @@
 					$insertDupsStmt->bindValue(':question',$question);
 					$insertDupsStmt->bindValue(':passoff', $passOff);
 					$insertDupsStmt->bindValue(':queueabuse', $queueAbuse);
+					$insertDupsStmt->bindValue(':queueId', $queueId);
 
 					//add the student to the student table
 					$insertToStudent = "INSERT OR IGNORE INTO STUDENTS (NetId, counter) VALUES (:netId, 0)";
@@ -415,12 +454,12 @@
 
 					if($db->changes() > 0)
 					{
-						insertHistory($db, $userIdToRemove, $enqueueDetails["beingHelpedBy"], $enqueueDetails);
+						insertHistory($db, $userIdToRemove, $enqueueDetails["beingHelpedBy"], $enqueueDetails, "inlab");
 					}
 				}
 				else //the student was being helped by a TA, so act like a TA removed them
 				{
-					dequeueHelperForTa($db, $userIdToRemove, $enqueueDetails["beingHelpedBy"], $enqueueDetails);
+					dequeueHelperForTa($db, $userIdToRemove, $enqueueDetails["beingHelpedBy"], $enqueueDetails, "inlab");
 				}
 
 				//update
@@ -453,10 +492,100 @@
 					// }
 					// else //remove them from the queue and update the history
 					// {
-					dequeueHelperForTaConceptual($db, $userIdToRemove, $enqueueDetails["beingHelpedBy"], $enqueueDetails, $isConceptual);
+					dequeueHelperForTaConceptual($db, $userIdToRemove, $enqueueDetails["beingHelpedBy"], $enqueueDetails, $isConceptual, "inlab");
 					// }
 					$avgs = getAverages($db);
-					$arrayToReturn = array("status"=>"success", "list"=>getQueue($db), "helped"=>getHelped($db), "avgs"=>$avgs);
+					$arrayToReturn = array("status"=>"success", "list"=>getQueue($db, "inlab"), "helped"=>getHelped($db, "inlab"), "other_list"=>getQueue($db, "zoom"), "other_helped"=>getHelped($db, "zoom"), "avgs"=>$avgs);
+				}
+				else
+				{
+					$findTARslt->finalize();
+					$findTAStmt->close();
+					//return error
+					$arrayToReturn = array("status"=>"error", "message"=>"not authorized to remove that person");
+				}
+			}
+
+			$db->exec("COMMIT");
+
+		}
+		catch(CAS_OutOfSequenceBeforeClientException $e)
+		{
+			//return error
+			$db->exec("ROLLBACK");
+			$arrayToReturn = array("status"=>"error", "message"=>"not authorized");
+		}
+
+		$db->close();
+		unset($db);
+		return $arrayToReturn;
+	}
+
+	function finishHelpingOtherQueue($userIdToRemove, $isConceptual)
+	{
+		try
+		{
+			require_once 'CAS-1.3.4/CAS.php';
+			phpCAS::client(CAS_VERSION_2_0,'cas.byu.edu',443,'cas');
+			$auth = phpCAS::checkAuthentication();
+			$thisUsersID = phpCAS::getUser();
+
+			//only uncomment during testing
+			//$thisUsersID = $userIdToRemove; //this means someones removing themselves
+			//$thisUsersID = $userIdToRemove . "NOT"; //this means a TA is removing someone
+			$settings = getSettings();
+			$db = new MyDB();
+			$db->exec("BEGIN;");
+			$arrayToReturn;
+
+			$enqueueDetails = getEnqueueDetails($db, $userIdToRemove);
+			//the student is removing themselves
+			if($thisUsersID == $userIdToRemove)
+			{
+				//check if they were being helped, if so treat is as if the TA removed them, otherwise just remove them
+				if($enqueueDetails["startedGettingHelpTime"] == null)
+				{
+					//just remove student from queue no mas
+					/*$updateQueue = "UPDATE QUEUE SET QUEUENUM = QUEUENUM - 1 WHERE QUEUENUM > Old.QUEUENUM";
+					$updateStmt = $db->prepare($updateQueue);
+					$updateStmt->excecute();
+					$updateStmt->close();*/
+					$removeUser = "DELETE FROM QUEUE WHERE NetId = :netId and queue_id = :queueId";
+					$removeUserStmt = $db->prepare($removeUser);
+					$removeUserStmt->bindValue(':netId',$userIdToRemove);
+					$removeUserStmt->bindValue(':netId',"zoom");
+					$removeUserStmt->execute();
+					$removeUserStmt->close();
+
+					if($db->changes() > 0)
+					{
+						insertHistory($db, $userIdToRemove, $enqueueDetails["beingHelpedBy"], $enqueueDetails, "zoom");
+					}
+				}
+				else //the student was being helped by a TA, so act like a TA removed them
+				{
+					dequeueHelperForTa($db, $userIdToRemove, $enqueueDetails["beingHelpedBy"], $enqueueDetails, "zoom");
+				}
+
+				//update
+				$avgs = getAverages($db);
+				$arrayToReturn = array("status"=>'success', "userId"=>$thisUsersID, "spot"=>-1, "enqueueTime"=>0, "settings"=>$settings, "avgs"=>$avgs);
+			}
+			else //it could be a TA. Lets check
+			{
+				$findTA = "SELECT COUNT(*) AS NUM FROM TAS WHERE NetId = :netId";
+				$findTAStmt = $db->prepare($findTA);
+				$findTAStmt->bindValue(':netId',$thisUsersID);
+				$findTARslt = $findTAStmt->execute();
+				//A TA was found
+				$findTARow = $findTARslt->fetchArray(SQLITE3_ASSOC);
+				if($findTARow["NUM"] == 1)
+				{
+					$findTARslt->finalize();
+					$findTAStmt->close();
+					dequeueHelperForTaConceptual($db, $userIdToRemove, $enqueueDetails["beingHelpedBy"], $enqueueDetails, $isConceptual, "zoom");
+					$avgs = getAverages($db);
+					$arrayToReturn = array("status"=>"success", "list"=>getQueue($db, "inlab"), "helped"=>getHelped($db, "inlab"), "other_list"=>getQueue($db, "zoom"), "other_helped"=>getHelped($db, "zoom"), "avgs"=>$avgs);
 				}
 				else
 				{
@@ -521,12 +650,12 @@
 
 					if($db->changes() > 0)
 					{
-						insertHistory($db, $userIdToRemove, $userIdToRemove, $enqueueDetails);
+						insertHistory($db, $userIdToRemove, $userIdToRemove, $enqueueDetails, "inlab");
 					}
 				}
 				else //the student was being helped by a TA, so act like a TA removed them
 				{
-					dequeueHelperForTa($db, $userIdToRemove, $enqueueDetails["beingHelpedBy"], $enqueueDetails);
+					dequeueHelperForTa($db, $userIdToRemove, $enqueueDetails["beingHelpedBy"], $enqueueDetails, "inlab");
 				}
 
 				//update
@@ -562,7 +691,7 @@
 					// 	dequeueHelperForTa($db, $userIdToRemove, $thisUsersID, $enqueueDetails);
 					// }
 					$avgs = getAverages($db);
-					$arrayToReturn = array("status"=>"success", "list"=>getQueue($db), "helped"=>getHelped($db), "avgs"=>$avgs);
+					$arrayToReturn = array("status"=>"success", "list"=>getQueue($db, "inlab"), "helped"=>getHelped($db, "inlab"), "other_list"=>getQueue($db, "zoom"), "other_helped"=>getHelped($db, "zoom"), "avgs"=>$avgs);
 
 				}
 				else
@@ -589,17 +718,126 @@
 		return $arrayToReturn;
 	}
 
-	function dequeueHelperForTa($db, $userIdToRemove, $thisUsersID, $enqueueDetails)
+	function dequeueUserOtherQueue($userIdToRemove)
 	{
-		dequeueHelperForTaConceptual($db, $userIdToRemove, $thisUsersID, $enqueueDetails, false);
+
+
+		try
+		{
+			require_once 'CAS-1.3.4/CAS.php';
+			phpCAS::client(CAS_VERSION_2_0,'cas.byu.edu',443,'cas');
+			$auth = phpCAS::checkAuthentication();
+			$thisUsersID = phpCAS::getUser();
+
+			//only uncomment during testing
+			//$thisUsersID = $userIdToRemove; //this means someones removing themselves
+			//$thisUsersID = $userIdToRemove . "NOT"; //this means a TA is removing someone
+			$settings = getSettings();
+			$db = new MyDB();
+			$db->exec("BEGIN;");
+			$arrayToReturn;
+
+			$enqueueDetails = getEnqueueDetails($db, $userIdToRemove);
+			//the student is removing themselves
+			if($thisUsersID == $userIdToRemove)
+			{
+				//check if they were being helped, if so treat is as if the TA removed them, otherwise just remove them
+				if($enqueueDetails["startedGettingHelpTime"] == null)
+				{
+					//just remove student from queue no mas
+					/*$updateQueue = "UPDATE QUEUE SET QUEUENUM = QUEUENUM - 1 WHERE QUEUENUM > Old.QUEUENUM";
+					$updateStmt = $db->prepare($updateQueue);
+					$updateStmt->excecute();
+					$updateStmt->close();*/
+					$removeUser = "DELETE FROM QUEUE WHERE NetId = :netId AND queue_id == 'zoom'";
+					$removeUserStmt = $db->prepare($removeUser);
+					$removeUserStmt->bindValue(':netId',$userIdToRemove);
+					$removeUserStmt->execute();
+					$removeUserStmt->close();
+
+					if($db->changes() > 0)
+					{
+						insertHistory($db, $userIdToRemove, $userIdToRemove, $enqueueDetails, "zoom");
+					}
+				}
+				else //the student was being helped by a TA, so act like a TA removed them
+				{
+					dequeueHelperForTa($db, $userIdToRemove, $enqueueDetails["beingHelpedBy"], $enqueueDetails, "zoom");
+				}
+
+				//update
+				$avgs = getAverages($db);
+				$arrayToReturn = array("status"=>'success', "userId"=>$thisUsersID, "spot"=>-1, "enqueueTime"=>0, "settings"=>$settings, "avgs"=>$avgs);
+			}
+			else //it could be a TA. Lets check
+			{
+				$findTA = "SELECT COUNT(*) AS NUM FROM TAS WHERE NetId = :netId";
+				$findTAStmt = $db->prepare($findTA);
+				$findTAStmt->bindValue(':netId',$thisUsersID);
+				$findTARslt = $findTAStmt->execute();
+				//A TA was found
+				$findTARow = $findTARslt->fetchArray(SQLITE3_ASSOC);
+				if($findTARow["NUM"] == 1)
+				{
+					$findTARslt->finalize();
+					$findTAStmt->close();
+
+					//Check if STARTEDGETTINGHELPTIME is empty, if so, update QUEUE and set STARTEDGETTINGHELPTIME to current time
+					if($enqueueDetails["startedGettingHelpTime"] == null)
+					{
+						$sql = "UPDATE QUEUE Set startedGettingHelpTime = :time, BeingHelpedBy = :taId, QUEUENUM = 0 WHERE netId = :netId and queue_id = :queudId"; //Q
+						$updateStmt = $db->prepare($sql);
+						$updateStmt->bindValue(":netId", $userIdToRemove);
+						$updateStmt->bindValue(":taId", $thisUsersID);
+						$updateStmt->bindValue("time", time()*1000);
+						$updateStmt->bindValue(":queueId", "zoom");
+						$updateStmt->execute();
+						$updateStmt->close();
+					}
+					// else //remove them from the queue and update the history
+					// {
+					// 	dequeueHelperForTa($db, $userIdToRemove, $thisUsersID, $enqueueDetails);
+					// }
+					$avgs = getAverages($db);
+					$arrayToReturn = array("status"=>"success", "list"=>getQueue($db, "inlab"), "helped"=>getHelped($db, "inlab"), "other_list"=>getQueue($db, "zoom"), "other_helped"=>getHelped($db, "zoom"), "avgs"=>$avgs);
+
+				}
+				else
+				{
+					$findTARslt->finalize();
+					$findTAStmt->close();
+					//return error
+					$arrayToReturn = array("status"=>"error", "message"=>"not authorized to remove that person");
+				}
+			}
+
+			$db->exec("COMMIT");
+
+		}
+		catch(CAS_OutOfSequenceBeforeClientException $e)
+		{
+			//return error
+			$db->exec("ROLLBACK");
+			$arrayToReturn = array("status"=>"error", "message"=>"not authorized");
+		}
+
+		$db->close();
+		unset($db);
+		return $arrayToReturn;
 	}
 
-	function dequeueHelperForTaConceptual($db, $userIdToRemove, $thisUsersID, $enqueueDetails, $isConceptual)
+	function dequeueHelperForTa($db, $userIdToRemove, $thisUsersID, $enqueueDetails, $queueId)
+	{
+		dequeueHelperForTaConceptual($db, $userIdToRemove, $thisUsersID, $enqueueDetails, false, $queueId);
+	}
+
+	function dequeueHelperForTaConceptual($db, $userIdToRemove, $thisUsersID, $enqueueDetails, $isConceptual, $queueId)
 	{
 		//remove the student from the queue (a trigger will update everyone elses spot in line)
-		$removeStudentSQL = "DELETE FROM QUEUE WHERE NetId = :netId";
+		$removeStudentSQL = "DELETE FROM QUEUE WHERE NetId = :netId AND queue_id = :queueId";
 		$removeStudentStmt = $db->prepare($removeStudentSQL);
 		$removeStudentStmt->bindValue(':netId',$userIdToRemove);
+		$removeStudentStmt->bindValue(':queue_id', $queueId);
 		$removeStudentStmt->execute();
 		$removeStudentStmt->close();
 
@@ -629,7 +867,7 @@
 			$incrementStudentCounterStmt->execute();
 			$incrementStudentCounterStmt->close();
 
-			insertHistoryConceptual($db, $userIdToRemove, $thisUsersID, $enqueueDetails, $isConceptual);
+			insertHistoryConceptual($db, $userIdToRemove, $thisUsersID, $enqueueDetails, $isConceptual, $queueId);
 		}
 	}
 
@@ -651,15 +889,15 @@
 		return $toReturn;
 	}
 
-	function insertHistory($db, $netId, $removedBy, $enqueueDetails)
+	function insertHistory($db, $netId, $removedBy, $enqueueDetails, $queueId)
 	{
-		insertHistoryConceptual($db, $netId, $removedBy, $enqueueDetails, false);
+		insertHistoryConceptual($db, $netId, $removedBy, $enqueueDetails, false, $queueId);
 	}
 
-	function insertHistoryConceptual($db, $netId, $removedBy, $enqueueDetails, $isConceptual)
+	function insertHistoryConceptual($db, $netId, $removedBy, $enqueueDetails, $isConceptual, $queueId)
 	{
 
-		$insertHistory = "Insert Into QUEUEHISTORY (NetId, removedBy, enqueueTime, dequeueTime, QUESTION, PASSOFF, DoneGettingHelpTime, conceptualQuestion) VALUES (:netId, :removedBy, :enqueueTime, :dequeueTime, :question, :passoff, :doneGettingHelpTime, :isConceptual)";
+		$insertHistory = "Insert Into QUEUEHISTORY (NetId, removedBy, enqueueTime, dequeueTime, QUESTION, PASSOFF, DoneGettingHelpTime, conceptualQuestion, queue_id) VALUES (:netId, :removedBy, :enqueueTime, :dequeueTime, :question, :passoff, :doneGettingHelpTime, :isConceptual, :queueId)";
 
 		$dequeueHistoryStmt = $db->prepare($insertHistory);
 		$dequeueHistoryStmt->bindValue(':netId', $netId);
@@ -672,6 +910,7 @@
 		//if startedGettingHelpTime is null they didn't get help so just put null here, other wise put in the current time
 		$dequeueHistoryStmt->bindValue(':doneGettingHelpTime', ($enqueueDetails["startedGettingHelpTime"] == null ? $enqueueDetails["startedGettingHelpTime"] : time()*1000));
 		$dequeueHistoryStmt->bindValue(':isConceptual', $isConceptual);
+		$dequeueHistoryStmt->bindValue(':queueId', $queueId);
 		$dequeueHistoryStmt->execute();
 		$dequeueHistoryStmt->close();
 
@@ -720,7 +959,7 @@
 				$stmt->close();
 
 				$avgs = getAverages($db);
-				$toReturn = array("status"=>"success", "list"=>getQueue($db), "avgs"=>$avgs);
+				$toReturn = array("status"=>"success", "list"=>getQueue($db, "inlab"), "helped"=>getHelped($db, "inlab"), "other_list"=>getQueue($db, "zoom"), "other_helped"=>getHelped($db, "zoom"), "avgs"=>$avgs);
 				$db->exec("COMMIT");
 				$db->close();
 				unset($db);
@@ -780,7 +1019,7 @@
 		return array("questionsRemainingDay"=>$dailyQuestionsRemaining, "questionsRemainingWeek"=>$weeklyQuestionsRemaining);
 	}
 
-	function getUserStatus($userId)
+	function getUserStatus($userId, $queueId)
 	{
 		$settings = getSettings();
 		$db = new MyDB();
@@ -788,8 +1027,13 @@
 		$db->exec('BEGIN');
 		$avgs = getAverages($db);
 		$questionStatus = getQuestionStatus($db, $userId);
-
-		$sql = "SELECT * FROM EXTENDEDQUEUE WHERE NetId = :netId";
+		if ($queueId == "zoom")
+		{
+			$sql = "SELECT * FROM EXTENDEDOTHERQUEUE WHERE NetId = :netId";
+		}
+		else {
+			$sql = "SELECT * FROM EXTENDEDQUEUE WHERE NetId = :netId"; //swap these declarations based on which queue page this will be used for use this one for the zoom queue page
+		}
 		$stmt = $db->prepare($sql);
 		$stmt->bindValue("netId", $userId);
 		$result = $stmt->execute();
@@ -811,7 +1055,6 @@
 		$db->close();
 		unset($db);
 		return $itemInQueue;
-
 	}
 
 	function verifyTA($userId)
@@ -858,7 +1101,7 @@
 		return $result;
 	}
 
-	function getQueue($db)
+	function getQueue($db, $queueId)
 	{
 		$manageDB = false;
 		if($db == null)
@@ -868,8 +1111,9 @@
 
 			$db->exec('BEGIN');
 		}
-		$sql = "SELECT * FROM WAITING";
+		$sql = "SELECT * FROM WAITING where queue_id = :queueId";
 		$stmt = $db->prepare($sql);
+		$stmt->bindValue(":queueId", $queueId);
 		$result = $stmt->execute();
 
 		$listToReturn = array();
@@ -891,7 +1135,7 @@
 		return $listToReturn;
 	}
 
-	function getHelped($db)
+	function getHelped($db, $queueId)
 	{
 		$manageDB = false;
 		if($db == null)
@@ -901,8 +1145,9 @@
 
 			$db->exec('BEGIN');
 		}
-		$sql = "SELECT * FROM HELPED";
+		$sql = "SELECT * FROM HELPED where queue_id = :queueId";
 		$stmt = $db->prepare($sql);
+		$stmt->bindValue(":queueId", $queueId);
 		$result = $stmt->execute();
 
 		$listToReturn = array();
@@ -1456,31 +1701,31 @@
 		$active = $result->fetchArray(SQLITE3_ASSOC);
 		$result->finalize();
 		$stmt->close();
-		$sql = "SELECT * FROM SETTINGS WHERE name = 'lastTime'";
-		$stmt = $db->prepare($sql);
-		$result = $stmt->execute();
-		$disableTime = $result->fetchArray(SQLITE3_ASSOC);
-		$result->finalize();
-		$stmt->close();
-		$sql = "SELECT * FROM SETTINGS WHERE name = 'autoDisable'";
-		$stmt = $db->prepare($sql);
-		$result = $stmt->execute();
-		$autoDisable = $result->fetchArray(SQLITE3_ASSOC);
-		$result->finalize();
-		$stmt->close();
+		// $sql = "SELECT * FROM SETTINGS WHERE name = 'lastTime'";
+		// $stmt = $db->prepare($sql);
+		// $result = $stmt->execute();
+		// $disableTime = $result->fetchArray(SQLITE3_ASSOC);
+		// $result->finalize();
+		// $stmt->close();
+		// $sql = "SELECT * FROM SETTINGS WHERE name = 'autoDisable'";
+		// $stmt = $db->prepare($sql);
+		// $result = $stmt->execute();
+		// $autoDisable = $result->fetchArray(SQLITE3_ASSOC);
+		// $result->finalize();
+		// $stmt->close();
 
-		if ($autoDisable["value"] == "true") {
-			$curTime = date('Gi');
-				if ($curTime >= $disableTime["value"]) {
-					$sql = "UPDATE SETTINGS SET value = 'false' WHERE name = 'queueActive'";
-					$stmt = $db->prepare($sql);
-					$result = $stmt->execute();
-
-					$result->finalize();
-					$stmt->close();
-				}
-			// }
-		}
+		// if ($autoDisable["value"] == "true") {
+		// 	$curTime = date('Gi');
+		// 		if ($curTime >= $disableTime["value"]) {
+		// 			$sql = "UPDATE SETTINGS SET value = 'false' WHERE name = 'queueActive'";
+		// 			$stmt = $db->prepare($sql);
+		// 			$result = $stmt->execute();
+		//
+		// 			$result->finalize();
+		// 			$stmt->close();
+		// 		}
+		// 	// }
+		// }
 
 		$db->exec("COMMIT");
 		$db->close();
