@@ -16,11 +16,11 @@ if(isset($_GET["id"])) //only get one person
 			{
 
 				$avgs = getAverages(null);
-				echo json_encode(array("status"=>"success", "list"=>getQueue(null), "helped"=>getHelped(null), "stats"=>getStats(), "avgs"=>$avgs, "settings"=>getSettings()));
+				echo json_encode(array("status"=>"success", "list"=>getQueue(null, "inlab"), "helped"=>getHelped(null, "inlab"), "other_list"=>getQueue(null, "zoom"), "other_helped"=>getHelped(null, "zoom"), "stats"=>getStats(), "avgs"=>$avgs, "settings"=>getSettings()));
 			}
 			else
 			{
-				$temp = getUserStatus($user);
+				$temp = getUserStatus($user, $_GET["queueId"]);
 				echo json_encode($temp);
 			}
 		}

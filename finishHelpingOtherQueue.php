@@ -11,7 +11,7 @@
 		//ELSE	see if the logged in user is on the TA table
 			//if yes then increment their counter and remove from the list
 		require_once "DBConnect.php";
-		echo json_encode(finishHelping($_POST["username"], $_POST["conceptual"]));
+		echo json_encode(finishHelpingOtherQueue($_POST["username"], $_POST["conceptual"]));
 
 		//echo json_encode(array("status"=>"success", "user"=>$user, "spot"=>"6");
 	}

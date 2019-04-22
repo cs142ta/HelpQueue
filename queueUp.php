@@ -10,7 +10,7 @@
 
 		//echo the same info as getStatus (user name, spot in line, and time queued up)
 		require_once 'DBConnect.php';
-		echo json_encode(enqueue($_POST["username"], $_POST["question"], $_POST["passOff"]));
+		echo json_encode(enqueue($_POST["username"], $_POST["question"], $_POST["passOff"], $_POST["queueId"]));
 
 		//echo json_encode(array("status"=>"success", "user"=>$user, "spot"=>rand(3,5), "enqueueTime"=time()));
 	}

@@ -1,3 +1,9 @@
+TODO There is a lot of refactorin that can occur in the DBConnect file. There should be some blocks that can be combined into functions or some functions that can be given wrappers to have one of a few different ways of executing. Notifications for both queues should be optional and set on a per TA basis as an additional column on the table.
+TODO Replace the area of code that is replacing lab with zoom in the students.js with a regex instead of lots of replaces (or the UI should show the title as set in the PHP instead of from the settings).
+TODO Perhaps consider shrinking the FAQ link size
+TODO Consider A combining a lot of the shared files into one, or using symlinks to be able to not have duplicate code.
+TODO Try to remove as much queue page specific code as possible to essentially be able to just use one set of files.
+
 HelpQueue
 The help queue for CS 142.
 The queue is used as a structured method for students to request and receive help.

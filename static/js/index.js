@@ -9,7 +9,7 @@ var alertShown = false;
 var enqueueTime = 0;
 var currentSpotInLine = -1;
 var spinner;
-var activeView = "#queue";
+var activeView = "#superqueue";
 var addressBase = "";
 var pauseUpdate = false;
 var refreshTime = new Date().getTime();
@@ -31,6 +31,10 @@ var flashTitleBool = false;
 var showNotifBool = false;
 var currentlyGettingHelp = false;
 var adjustTimeModalOpen = false;
+var changeMOTDModalOpen = false;
+var menuDisplayed = false;
+var menuBox = null;
+var netIdToRemove = "";
 
 //count the time waiting
 setInterval(function() {
@@ -2134,6 +2138,40 @@ $(function() {
 
     });
 
+    $("#changeMOTDBtn").on("click", function() {
+      changeMOTDModalOpen=true;
+        $("#motdChangeModal").modal({
+            backdrop: 'static',
+            keyboard: false
+        });
+    });
+
+    $("#motdSubmit").on("click", function() {
+        var modtIn = $("#motdInput").val();
+        var motdLink = $("#motdLinkInput").val();
+        if (modtIn.length <= 0) {
+            alert("Please enter a MOTD");
+        } else {
+            changeMOTDModalOpen=false;
+            $('#motdChangeModal').modal('hide');
+            var obj = {
+                motd: modtIn,
+                motdLink: motdLink
+            };
+
+            var success = function(data) {
+              updateUI({
+                  settings: data
+              });
+            };
+            var error = function(data) {
+            };
+
+            $("#motdInput").val("");
+            postData(obj, "/changeMOTD.php", success, error);
+        }
+    });
+
     $("#changePassOffHighlighColorBtn").on("click", function() {
         $("#changePassOffHighlighColorModal").modal();
         $(".passOffSelector").on('click', function() {
@@ -2256,7 +2294,7 @@ $(function() {
     $("#editRawData").hide();
 
     $("#viewQueue").on('click', function() {
-        toggleView("#queue");
+        toggleView("#superqueue");
     });
     $("#viewStats").on('click', function() {
         toggleView("#stats");
@@ -2431,6 +2469,16 @@ function updateUI(data) {
                         originalTitle = value + " Help Queue";
                         document.title = value + " Help Queue";
                     }
+                }
+                if (key === "motd" && !changeMOTDModalOpen)
+                {
+                  $("#currentMOTD").empty();
+                  $("#currentMOTD").html(value);
+                  $("#motdInput").val(value);
+                }
+                if (key === "motdLink" && !changeMOTDModalOpen)
+                {
+                  $("#motdLinkInput").val(value);
                 }
                 if (key === "notifyThreshold") {
                     notifyThresholdNum = value;
@@ -2671,10 +2719,8 @@ function updateUI(data) {
 
                         notification.onclick = function() {
                             window.focus();
-                        }
-                        ;
+                        };
                     }
-
                     flashTitle("Someone needs your help!");
                 }
             // } else {
@@ -2691,6 +2737,7 @@ function updateUI(data) {
 
         //remove the elements in the list so it doesn't repeat and get huge
         $('#list').empty();
+        // $('#other_list').empty();
         $.each(data.list, function(index, obj) {
             if (obj.question == null)
                 obj.question = "NONE";
@@ -2706,10 +2753,13 @@ function updateUI(data) {
             }
 
             var output;
+            // var output2;
             // if(obj.startedGettingHelpTime == null) //waiting in line
             // {
-            output = '<div class="row myRow" id="' + obj.netId + '">' + '<div class="col-xs-3">' + obj.name + '</div>' + questionColumn + '<div class="col-xs-2">' + getTimeDifference(parseInt(obj.enqueueTime)) + '</div>' + '<div class="col-xs-2">' + '<button id="removeButton' + obj.netId + '" onClick=removePerson(\'' + obj.netId + '\') class="btn btn-info btn-lg fa fa-ambulance"> Offer Assistance</button>' +
+            output = '<div class="row myRow queue-row" id="' + obj.netId + '">' + '<div class="col-xs-3">' + obj.name + '</div>' + questionColumn + '<div class="col-xs-2">' + getTimeDifference(parseInt(obj.enqueueTime)) + '</div>' + '<div class="col-xs-2">' + '<button id="removeButton' + obj.netId + '" onClick=removePerson(\'' + obj.netId + '\') class="btn btn-info btn-lg fa fa-ambulance offer-help-button"> Offer Help</button>' +
             '</div></div>';
+            // output2 = '<div class="row myRow queue-row" id="' + obj.netId + '_otherqueue">' + '<div class="col-xs-3">' + obj.name + '</div>' + questionColumn + '<div class="col-xs-2">' + getTimeDifference(parseInt(obj.enqueueTime)) + '</div>' + '<div class="col-xs-2">' + '<button id="removeButton' + obj.netId + '_otherqueue" onClick=removeOtherQueuePerson(\'' + obj.netId + '\') class="btn btn-info btn-lg fa fa-ambulance offer-help-button"> Offer Help</button>' +
+            // '</div></div>';
             // }
             // else // currently getting help
             // {
@@ -2721,6 +2771,7 @@ function updateUI(data) {
             // 		'</button></div></div>';
             // }
             $('#list').append(output);
+            // $('#other_list').append(output2);
         });
 
     }
@@ -2798,6 +2849,7 @@ function updateUI(data) {
 
         //remove the elements in the list so it doesn't repeat and get huge
         $('#helped').empty();
+        // $('#other_helped').empty();
         $.each(data.helped, function(index, obj) {
             if (obj.question == null)
                 obj.question = "NONE";
@@ -2813,6 +2865,7 @@ function updateUI(data) {
             }
 
             var output;
+            // var output2;
             // if(obj.startedGettingHelpTime != null) //waiting in line
             // {
             // 	output = '<div class="row myRow" id="'+obj.netId+'">' +
@@ -2820,15 +2873,286 @@ function updateUI(data) {
             // 		questionColumn +
             // 		'<div class="col-xs-2">' + getTimeDifference(parseInt(obj.enqueueTime)) + '</div>' +
             // 		'<div class="col-xs-2">' +
-            // 		'<button id="removeButton' + obj.netId +'" onClick=removePerson(\''+ obj.netId +'\') class="btn btn-info btn-lg fa fa-ambulance"> Offer Assistance</button>' +
+            // 		'<button id="removeButton' + obj.netId +'" onClick=removePerson(\''+ obj.netId +'\') class="btn btn-info btn-lg fa fa-ambulance"> Offer Help</button>' +
             //
             // 		'</div></div>';
             // }
             // else // currently getting help
             // {
-            output = '<div class="row myRow gettingHelpRow" id="' + obj.netId + '">' + '<div class="col-xs-3">' + obj.name + '<br/>(Being helped by: ' + convertNetIdToName(obj.beingHelpedBy) + ')</div>' + questionColumn + '<div class="col-xs-2">' + getTimeDifference(parseInt(obj.startedGettingHelpTime)) + '</div>' + '<div class="col-xs-2"><button id="removeButton' + obj.netId + '" onClick=dequeuePerson(\'' + obj.netId + '\') class="btn btn-danger btn-lg fa fa-times"> Remove' + '</button></div></div>';
+            output = '<div class="row myRow gettingHelpRow queue-row" id="' + obj.netId + '">' + '<div class="col-xs-3">' + obj.name + '<br/>(Being helped by: ' + convertNetIdToName(obj.beingHelpedBy) + ')</div>' + questionColumn + '<div class="col-xs-2">' + getTimeDifference(parseInt(obj.startedGettingHelpTime)) + '</div>' + '<div class="col-xs-2"><button id="removeButton' + obj.netId + '" onClick=dequeuePerson("' + obj.netId + '") class="btn btn-danger btn-lg fa fa-times"> Remove' + '</button></div></div>';
+            // output2 = '<div class="row myRow gettingHelpRow queue-row" id="' + obj.netId + "_otherqueue" + '">' + '<div class="col-xs-3">' + obj.name + '<br/>(Being helped by: ' + convertNetIdToName(obj.beingHelpedBy) + ')</div>' + questionColumn + '<div class="col-xs-2">' + getTimeDifference(parseInt(obj.startedGettingHelpTime)) + '</div>' + '<div class="col-xs-2"><button id="removeButton' + obj.netId + '_otherqueue" onClick=dequeueOtherQueuePerson("' + obj.netId + '") class="btn btn-danger btn-lg fa fa-times"> Remove' + '</button></div></div>';
             // }
             $('#helped').append(output);
+            // $('#other_helped').append(output2);
+            var tempVal = $('#' + obj.netId)[0].getElementsByTagName("button")[1];
+            tempVal.addEventListener("contextmenu", function() {
+              var left = arguments[0].clientX;
+              var top = arguments[0].clientY;
+              netIdToRemove = obj.netId
+              menuBox = window.document.querySelector(".menu-main-queue");
+              menuBox.style.left = left + "px";
+              menuBox.style.top = top + "px";
+              menuBox.style.display = "block";
+
+              arguments[0].preventDefault();
+
+              menuDisplayed = true;
+            }, false);
+            tempVal = $('#' + obj.netId + "_otherqueue")[0].getElementsByTagName("button")[1];
+            tempVal.addEventListener("contextmenu", function() {
+              var left = arguments[0].clientX;
+              var top = arguments[0].clientY;
+              netIdToRemove = obj.netId
+              menuBox = window.document.querySelector(".menu-other-queue");
+              menuBox.style.left = left + "px";
+              menuBox.style.top = top + "px";
+              menuBox.style.display = "block";
+
+              arguments[0].preventDefault();
+
+              menuDisplayed = true;
+            }, false);
+            // console.log(tempVal);
+        });
+
+    }
+
+    if (data.hasOwnProperty("other_helped")) {
+      //   if (data.helped.length > 0) {
+      //       //notification
+      //       //This will show the notification on the screen. Super nice because if a user is not in their browser, the notification
+      //       //will still show up on the screen. Sadly, every time the client polls it removes the current notificaion and displays
+      //       //the same notification again. Looks really ugly. If I could find a close trigger that gets fired when the notification
+      //       //is closed (either by the user or by some JS) then a simple boolean could be toggled (to show the notification based on
+      //       //if there is already a notification on the screen.) At the time of writting this the close or onclose method of the
+      //       //notification interface were depricated and could not be relied on.
+			//
+      //       //Another idea is to just show it once on the student side, then never again till they get back in line??? that could work
+      //       //not helpful for a TA...but does it need to be? if there are loads of people on the queue the TA doenst need to know to
+      //       //look at the queue, its full. They already know to look.
+			//
+      //       /*if (typeof Notification !== 'undefined')
+			// {
+			//
+			// 	Notification.requestPermission(function (permission)
+			// 	{
+			// 		if (permission === 'granted')
+			// 		{
+			// 			var notification = new Notification('Someone needs your help!', {
+			// 				body: 'In fact, ' + data.list.length + " " + (data.list.length == 1 ? 'person' : "people") + " need your help",
+			// 				tag:"MyNotify"
+			// 			});
+			//
+			// 			notification.onclick = function ()
+			// 			{
+			// 				window.focus();
+			// 			};
+			// 		}
+			// 	});
+			// }*/
+			//
+      //       // var someonesStillInLine = false;
+      //       // for (var index = 0; index < data.helped.length; index++) {
+      //       //     if (data.helped[index].startedGettingHelpTime == null) {
+      //       //         someonesStillInLine = true;
+      //       //         break;
+      //       //     }
+      //       // }
+      //       //title flashing
+      //       if (someonesStillInLine) {
+      //           if (!flashTitleBool) {
+      //               flashTitleBool = true;
+      //               // if (showNotifBool)
+      //               // {
+      //               //     var notification = new Notification('Someone needs your help!', {
+      //               //                 body: 'New student in the queue to help',
+      //               //                 tag:"MyNotify"
+      //               //             });
+      //               //
+      //               //             notification.onclick = function ()
+      //               //             {
+      //               //                 window.focus();
+      //               //             };
+      //               // }
+      //               // showNotifBool = false;
+      //               flashTitle("Someone needs your help!");
+      //           }
+      //       } else {
+      //           flashTitleBool = false;
+      //           // showNotifBool = true;
+      //       }
+      //   } else //there is no one else in line. Dont flash the title
+      //   {
+      //       flashTitleBool = false;
+      //   }
+        //if we are here the person logged in is a TA. turn polling on
+        poll = true;
+
+        //remove the elements in the list so it doesn't repeat and get huge
+        $('#other_helped').empty();
+        // console.log(data.other_helped);
+        // $('#other_helped').empty();
+        $.each(data.other_helped, function(index, obj) {
+            if (obj.question == null)
+                obj.question = "NONE";
+
+            //the default, non pass off view
+            var params = "'" + obj.netId + "','" + obj.name.replace(' ', '&nbsp;') + "'";
+            var chatButton = '&nbsp;<button id="chatButton' + obj.netId + '" onClick=chatWith(' + params + ') class="btn btn-default btn-xs fa fa-comment-o"> Chat</button>'
+            var questionColumn = '<div class="col-xs-5">' + obj.question + chatButton + '</div>';
+
+            if (obj.passOff == "true") //oh! its a pass off!
+            {
+                questionColumn = '<div class="col-xs-5" style="background-color:' + currentPassOffHighlightColor + '">' + obj.question + chatButton + '</div>';
+            }
+
+            var output;
+            // var output2;
+            // if(obj.startedGettingHelpTime != null) //waiting in line
+            // {
+            // 	output = '<div class="row myRow" id="'+obj.netId+'">' +
+            // 		'<div class="col-xs-3">'+obj.name + '</div>' +
+            // 		questionColumn +
+            // 		'<div class="col-xs-2">' + getTimeDifference(parseInt(obj.enqueueTime)) + '</div>' +
+            // 		'<div class="col-xs-2">' +
+            // 		'<button id="removeButton' + obj.netId +'" onClick=removePerson(\''+ obj.netId +'\') class="btn btn-info btn-lg fa fa-ambulance"> Offer Help</button>' +
+            //
+            // 		'</div></div>';
+            // }
+            // else // currently getting help
+            // {
+            // output = '<div class="row myRow gettingHelpRow queue-row" id="' + obj.netId + '">' + '<div class="col-xs-3">' + obj.name + '<br/>(Being helped by: ' + convertNetIdToName(obj.beingHelpedBy) + ')</div>' + questionColumn + '<div class="col-xs-2">' + getTimeDifference(parseInt(obj.startedGettingHelpTime)) + '</div>' + '<div class="col-xs-2"><button id="removeButton' + obj.netId + '" onClick=dequeuePerson("' + obj.netId + '") class="btn btn-danger btn-lg fa fa-times"> Remove' + '</button></div></div>';
+            output = '<div class="row myRow gettingHelpRow queue-row" id="' + obj.netId + "_otherqueue" + '">' + '<div class="col-xs-3">' + obj.name + '<br/>(Being helped by: ' + convertNetIdToName(obj.beingHelpedBy) + ')</div>' + questionColumn + '<div class="col-xs-2">' + getTimeDifference(parseInt(obj.startedGettingHelpTime)) + '</div>' + '<div class="col-xs-2"><button id="removeButton' + obj.netId + '_otherqueue" onClick=dequeueOtherQueuePerson("' + obj.netId + '") class="btn btn-danger btn-lg fa fa-times"> Remove' + '</button></div></div>';
+            // }
+            $('#other_helped').append(output);
+            // $('#other_helped').append(output2);
+            tempVal = $('#' + obj.netId + "_otherqueue")[0].getElementsByTagName("button")[1];
+            tempVal.addEventListener("contextmenu", function() {
+              var left = arguments[0].clientX;
+              var top = arguments[0].clientY;
+              netIdToRemove = obj.netId
+              menuBox = window.document.querySelector(".menu-other-queue");
+              menuBox.style.left = left + "px";
+              menuBox.style.top = top + "px";
+              menuBox.style.display = "block";
+
+              arguments[0].preventDefault();
+
+              menuDisplayed = true;
+            }, false);
+            // console.log(tempVal);
+        });
+
+    }
+
+    if (data.hasOwnProperty("other_list")) {
+        if (data.list.length > 0) {
+            //notification
+            //This will show the notification on the screen. Super nice because if a user is not in their browser, the notification
+            //will still show up on the screen. Sadly, every time the client polls it removes the current notificaion and displays
+            //the same notification again. Looks really ugly. If I could find a close trigger that gets fired when the notification
+            //is closed (either by the user or by some JS) then a simple boolean could be toggled (to show the notification based on
+            //if there is already a notification on the screen.) At the time of writting this the close or onclose method of the
+            //notification interface were depricated and could not be relied on.
+
+            //Another idea is to just show it once on the student side, then never again till they get back in line??? that could work
+            //not helpful for a TA...but does it need to be? if there are loads of people on the queue the TA doenst need to know to
+            //look at the queue, its full. They already know to look.
+
+            /*if (typeof Notification !== 'undefined')
+			{
+
+				Notification.requestPermission(function (permission)
+				{
+					if (permission === 'granted')
+					{
+						var notification = new Notification('Someone needs your help!', {
+							body: 'In fact, ' + data.list.length + " " + (data.list.length == 1 ? 'person' : "people") + " need your help",
+							tag:"MyNotify"
+						});
+
+						notification.onclick = function ()
+						{
+							window.focus();
+						};
+					}
+				});
+			}*/
+
+            // var someonesStillInLine = false;
+            // for (var index = 0; index < data.list.length; index++) {
+            //     if (data.list[index].startedGettingHelpTime == null) {
+            //         someonesStillInLine = true;
+            //         break;
+            //     }
+            // }
+            //title flashing
+            // if (someonesStillInLine) {
+                if (!flashTitleBool) {
+                    flashTitleBool = true;
+                    if (showNotifBool) {
+                        showNotifBool = false;
+                        var notification = new Notification('Someone needs your help!',{
+                            body: 'New student in the queue to help',
+                            tag: "MyNotify"
+                        });
+
+                        notification.onclick = function() {
+                            window.focus();
+                        };
+                    }
+                    flashTitle("Someone needs your help!");
+                }
+            // } else {
+            //     flashTitleBool = false;
+						//
+            // }
+        } else //there is no one else in line. Dont flash the title
+        {
+            flashTitleBool = false;
+						showNotifBool = true;
+        }
+        //if we are here the person logged in is a TA. turn polling on
+        poll = true;
+
+        //remove the elements in the list so it doesn't repeat and get huge
+        $('#other_list').empty();
+        // console.log(data.other_list);
+        // $('#other_list').empty();
+        $.each(data.other_list, function(index, obj) {
+            if (obj.question == null)
+                obj.question = "NONE";
+
+            //the default, non pass off view
+            var params = "'" + obj.netId + "','" + obj.name.replace(' ', '&nbsp;') + "'";
+            var chatButton = '&nbsp;<button id="chatButton' + obj.netId + '" onClick=chatWith(' + params + ') class="btn btn-default btn-xs fa fa-comment-o"> Chat</button>'
+            var questionColumn = '<div class="col-xs-5">' + obj.question + chatButton + '</div>';
+
+            if (obj.passOff == "true") //oh! its a pass off!
+            {
+                questionColumn = '<div class="col-xs-5" style="background-color:' + currentPassOffHighlightColor + '">' + obj.question + chatButton + '</div>';
+            }
+
+            var output;
+            // var output2;
+            // if(obj.startedGettingHelpTime == null) //waiting in line
+            // {
+            output = '<div class="row myRow queue-row" id="' + obj.netId + '">' + '<div class="col-xs-3">' + obj.name + '</div>' + questionColumn + '<div class="col-xs-2">' + getTimeDifference(parseInt(obj.enqueueTime)) + '</div>' + '<div class="col-xs-2">' + '<button id="removeButton' + obj.netId + '" onClick=removePerson(\'' + obj.netId + '\') class="btn btn-info btn-lg fa fa-ambulance offer-help-button"> Offer Help</button>' +
+            '</div></div>';
+            // output2 = '<div class="row myRow queue-row" id="' + obj.netId + '_otherqueue">' + '<div class="col-xs-3">' + obj.name + '</div>' + questionColumn + '<div class="col-xs-2">' + getTimeDifference(parseInt(obj.enqueueTime)) + '</div>' + '<div class="col-xs-2">' + '<button id="removeButton' + obj.netId + '_otherqueue" onClick=removeOtherQueuePerson(\'' + obj.netId + '\') class="btn btn-info btn-lg fa fa-ambulance offer-help-button"> Offer Help</button>' +
+            // '</div></div>';
+            // }
+            // else // currently getting help
+            // {
+            // 	output = '<div class="row myRow gettingHelpRow" id="'+obj.netId+'">' +
+            // 		'<div class="col-xs-3">'+obj.name + '<br/>(Being helped by: ' + convertNetIdToName(obj.beingHelpedBy) + ')</div>' +
+            // 		questionColumn +
+            // 		'<div class="col-xs-2">' + getTimeDifference(parseInt(obj.startedGettingHelpTime)) + '</div>' +
+            // 		'<div class="col-xs-2"><button id="removeButton' + obj.netId +'" onClick=removePerson(\''+ obj.netId +'\') class="btn btn-danger btn-lg fa fa-times"> Remove' +
+            // 		'</button></div></div>';
+            // }
+            $('#other_list').append(output);
+            // $('#other_list').append(output2);
         });
 
     }
@@ -2959,9 +3283,27 @@ function removePerson(user) {
     postData(userInfo, "/removeFromQueue.php", success, error);
 }
 
-function dequeuePerson(user) {
+function removeOtherQueuePerson(user) {
     var userInfo = {
         username: user
+    };
+    spin('removeButton' + user + '_otherqueue');
+
+    var success = function(data) {
+        removeSpinner('removeButton' + user + '_otherqueue');
+        updateUI(data);
+    };
+    var error = function(data) {
+        console.log(data);
+    };
+
+    postData(userInfo, "/removeFromOtherQueue.php", success, error);
+}
+
+function dequeuePerson(user) {
+    var userInfo = {
+        username: user,
+        conceptual: false
     };
     spin('removeButton' + user);
 
@@ -2974,6 +3316,93 @@ function dequeuePerson(user) {
     };
 
     postData(userInfo, "/finishHelping.php", success, error);
+}
+
+function dequeueOtherQueuePerson(user) {
+    var userInfo = {
+        username: user,
+        conceptual: false
+    };
+    spin('removeButton' + user + '_otherqueue');
+
+    var success = function(data) {
+        removeSpinner('removeButton' + user + '_otherqueue');
+        updateUI(data);
+    };
+    var error = function(data) {
+        console.log(data);
+    };
+
+    postData(userInfo, "/finishHelpingOtherQueue.php", success, error);
+}
+
+function removeNormal() {
+    var userInfo = {
+        username: netIdToRemove,
+        conceptual: false
+    };
+    spin('removeButton' + userInfo.username);
+
+    var success = function(data) {
+        removeSpinner('removeButton' + userInfo.username);
+        updateUI(data);
+    };
+    var error = function(data) {
+        console.log(data);
+    };
+
+    postData(userInfo, "/finishHelping.php", success, error);
+}
+
+function removeNormalOtherQueue() {
+    var userInfo = {
+        username: netIdToRemove.replace('_otherqueue', ''),
+        conceptual: false
+    };
+    spin('removeButton' + userInfo.username + '_otherqueue');
+
+    var success = function(data) {
+        removeSpinner('removeButton' + userInfo.username + '_otherqueue');
+        updateUI(data);
+    };
+    var error = function(data) {
+        console.log(data);
+    };
+
+    postData(userInfo, "/finishHelpingOtherQueue.php", success, error);
+}
+
+function removeFree() {
+    var userInfo = {
+        username: netIdToRemove,
+        conceptual: true
+    };
+    spin('removeButton' + userInfo.username);
+
+    var success = function(data) {
+        removeSpinner('removeButton' + userInfo.username);
+        updateUI(data);
+    };
+    var error = function(data) {
+        console.log(data);
+    };
+    postData(userInfo, "/finishHelping.php", success, error);
+}
+function removeFreeOtherQueue() {
+    var userInfo = {
+        username: netIdToRemove.replace('_otherqueue', ''),
+        conceptual: true
+    };
+    spin('removeButton' + userInfo.username + '_otherqueue');
+
+    var success = function(data) {
+        removeSpinner('removeButton' + userInfo.username + '_otherqueue');
+        updateUI(data);
+    };
+    var error = function(data) {
+        console.log(data);
+    };
+    postData(userInfo, "/finishHelpingOtherQueue.php", success, error);
 }
 
 function toggleTAActive(netId, currentActiveStatus) {
@@ -3158,8 +3587,6 @@ function postData(userName, handle) {
 }
 
 function postData(userName, handle, callBackSuccess, callBackError) {
-
-
     $.ajax({
         url: window.location.origin + addressBase + handle,
         type: 'post',
@@ -3168,6 +3595,7 @@ function postData(userName, handle, callBackSuccess, callBackError) {
         error: callBackError,
         data: userName
     });
+    console.log(userName);
 }
 
 Chart.types.Bar.extend({
