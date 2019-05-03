@@ -837,7 +837,7 @@
 		$removeStudentSQL = "DELETE FROM QUEUE WHERE NetId = :netId AND queue_id = :queueId";
 		$removeStudentStmt = $db->prepare($removeStudentSQL);
 		$removeStudentStmt->bindValue(':netId',$userIdToRemove);
-		$removeStudentStmt->bindValue(':queue_id', $queueId);
+		$removeStudentStmt->bindValue(':queueId', $queueId);
 		$removeStudentStmt->execute();
 		$removeStudentStmt->close();
 
