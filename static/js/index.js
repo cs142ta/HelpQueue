@@ -2898,7 +2898,10 @@ function updateUI(data) {
 
               menuDisplayed = true;
             }, false);
-            tempVal = $('#' + obj.netId + "_otherqueue")[0].getElementsByTagName("button")[1];
+
+
+            // Following was moved to line 3030
+            /*tempVal = $('#' + obj.netId + "_otherqueue")[0].getElementsByTagName("button")[1];
             tempVal.addEventListener("contextmenu", function() {
               var left = arguments[0].clientX;
               var top = arguments[0].clientY;
@@ -2911,7 +2914,7 @@ function updateUI(data) {
               arguments[0].preventDefault();
 
               menuDisplayed = true;
-            }, false);
+            }, false);*/
             // console.log(tempVal);
         });
 
