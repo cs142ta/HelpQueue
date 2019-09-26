@@ -2743,7 +2743,7 @@ function updateUI(data) {
                 obj.question = "NONE";
 
             //the default, non pass off view
-            var params = "'" + obj.netId + "','" + obj.name.replace(' ', '&nbsp;') + "'";
+            var params = "'" + obj.netId + "','" + obj.name.replace(/ /g, '&nbsp;') + "'";
             var chatButton = '&nbsp;<button id="chatButton' + obj.netId + '" onClick=chatWith(' + params + ') class="btn btn-default btn-xs fa fa-comment-o"> Chat</button>'
             var questionColumn = '<div class="col-xs-5">' + obj.question + chatButton + '</div>';
 
