@@ -2883,7 +2883,7 @@ function updateUI(data) {
             // }
             // else // currently getting help
             // {
-            output = '<div class="row myRow gettingHelpRow queue-row" id="' + obj.netId + '">' + '<div class="col-xs-3">' + obj.name + '<br/>(Being helped by: ' + convertNetIdToName(obj.beingHelpedBy) + ')</div>' + questionColumn + '<div class="col-xs-2">' + getTimeDifference(parseInt(obj.startedGettingHelpTime)) + '</div>' + '<div class="col-xs-2"><button id="removeButton' + obj.netId + '" onClick=dequeuePerson("' + obj.netId + '") class="btn btn-danger btn-lg fa fa-times"> Remove' + '</button></div></div>';
+            output = '<div class="row myRow gettingHelpRow queue-row" id="' + obj.netId + '">' + '<div class="col-xs-3">' + obj.name + '<br/>(Being helped by: ' + convertNetIdToName(obj.beingHelpedBy) + ')</div>' + questionColumn + '<div class="col-xs-2">' + getTimeDifference(parseInt(obj.startedGettingHelpTime)) + '</div>' + '<div class="col-xs-2"><button id="removeButton' + obj.netId + '" onClick=dequeuePerson("' + obj.netId + '","' + obj.beingHelpedBy + '") class="btn btn-danger btn-lg fa fa-times"> Remove' + '</button></div></div>';
             // output2 = '<div class="row myRow gettingHelpRow queue-row" id="' + obj.netId + "_otherqueue" + '">' + '<div class="col-xs-3">' + obj.name + '<br/>(Being helped by: ' + convertNetIdToName(obj.beingHelpedBy) + ')</div>' + questionColumn + '<div class="col-xs-2">' + getTimeDifference(parseInt(obj.startedGettingHelpTime)) + '</div>' + '<div class="col-xs-2"><button id="removeButton' + obj.netId + '_otherqueue" onClick=dequeueOtherQueuePerson("' + obj.netId + '") class="btn btn-danger btn-lg fa fa-times"> Remove' + '</button></div></div>';
             // }
             $('#helped').append(output);
@@ -3031,7 +3031,7 @@ function updateUI(data) {
             // else // currently getting help
             // {
             // output = '<div class="row myRow gettingHelpRow queue-row" id="' + obj.netId + '">' + '<div class="col-xs-3">' + obj.name + '<br/>(Being helped by: ' + convertNetIdToName(obj.beingHelpedBy) + ')</div>' + questionColumn + '<div class="col-xs-2">' + getTimeDifference(parseInt(obj.startedGettingHelpTime)) + '</div>' + '<div class="col-xs-2"><button id="removeButton' + obj.netId + '" onClick=dequeuePerson("' + obj.netId + '") class="btn btn-danger btn-lg fa fa-times"> Remove' + '</button></div></div>';
-            output = '<div class="row myRow gettingHelpRow queue-row" id="' + obj.netId + "_otherqueue" + '">' + '<div class="col-xs-3">' + obj.name + '<br/>(Being helped by: ' + convertNetIdToName(obj.beingHelpedBy) + ')</div>' + questionColumn + '<div class="col-xs-2">' + getTimeDifference(parseInt(obj.startedGettingHelpTime)) + '</div>' + '<div class="col-xs-2"><button id="removeButton' + obj.netId + '_otherqueue" onClick=dequeueOtherQueuePerson("' + obj.netId + '") class="btn btn-danger btn-lg fa fa-times"> Remove' + '</button></div></div>';
+            output = '<div class="row myRow gettingHelpRow queue-row" id="' + obj.netId + "_otherqueue" + '">' + '<div class="col-xs-3">' + obj.name + '<br/>(Being helped by: ' + convertNetIdToName(obj.beingHelpedBy) + ')</div>' + questionColumn + '<div class="col-xs-2">' + getTimeDifference(parseInt(obj.startedGettingHelpTime)) + '</div>' + '<div class="col-xs-2"><button id="removeButton' + obj.netId + '_otherqueue" onClick=dequeueOtherQueuePerson("' + obj.netId + '","' + obj.beingHelpedBy + '") class="btn btn-danger btn-lg fa fa-times"> Remove' + '</button></div></div>';
             // }
             $('#other_helped').append(output);
             // $('#other_helped').append(output2);
@@ -3311,7 +3311,17 @@ function removeOtherQueuePerson(user) {
     postData(userInfo, "/removeFromOtherQueue.php", success, error);
 }
 
-function dequeuePerson(user) {
+function dequeuePerson(user, taHelping) {
+    // Check if person clicking remove from Queue is the TA helping,
+    // if not, confirm removal to remove.
+    //if (!helpingTaCheck(user)) {
+    if (window.user != taHelping) {
+        var confirmedContinue = createConfirmationPopup(taHelping);
+        if (!confirmedContinue) {
+            return;
+        }
+    }
+
     var userInfo = {
         username: user,
         conceptual: false
@@ -3329,7 +3339,17 @@ function dequeuePerson(user) {
     postData(userInfo, "/finishHelping.php", success, error);
 }
 
-function dequeueOtherQueuePerson(user) {
+function dequeueOtherQueuePerson(user, taHelping) {
+    // Check if person clicking remove from Queue is the TA helping,
+    // if not, confirm removal to remove.
+    //if (!helpingTaCheck(user)) {
+    if (window.user != taHelping) {
+        var confirmedContinue = createConfirmationPopup(taHelping);
+        if (!confirmedContinue) {
+            return;
+        }
+    }
+
     var userInfo = {
         username: user,
         conceptual: false
@@ -3655,4 +3675,9 @@ function stuChat() {
         backdrop: 'static',
         keyboard: false
     });
+}
+
+function createConfirmationPopup(taHelping) {
+    console.log("Confirming Removal of Student being helped by a different TA");
+    return window.confirm("Do you wish to remove the student being helped by: " + convertNetIdToName(taHelping) + "?");
 }
