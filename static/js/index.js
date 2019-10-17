@@ -1147,7 +1147,17 @@ $(function() {
     }
     ;
 
+
+    // Coordinates polling server between different TA's according to a global
+    // unix time stamp.  Should make it so that the polling occurs (nearly)
+    // simultaneously across different computers/devices.
+    while (Date.now() % pollTimer > 20) {
+        // Leave empty
+    }
+
+
     //poll server for updates. The pollTimer comes from index.php and is different for students and TAs
+
     setInterval(function() {
         if (poll) {
             getStatus(user);
@@ -1915,8 +1925,8 @@ $(function() {
             alert("Please enter a value in miliseconds");
         } else if (nameIn.match(/[^0-9 ]+/)) {
             alert("Only numeric characters are allowed");
-        } else if (nameIn < 3000) {
-            alert("Value must be greater than 3000");
+        } else if (nameIn < 1000) {
+            alert("Value must be greater than 1000");
         } else {
             $('#taChangePollTimeModal').modal('hide');
             var obj = {
