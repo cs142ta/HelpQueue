@@ -1,9 +1,3 @@
-TODO There is a lot of refactorin that can occur in the DBConnect file. There should be some blocks that can be combined into functions or some functions that can be given wrappers to have one of a few different ways of executing. Notifications for both queues should be optional and set on a per TA basis as an additional column on the table.
-TODO Replace the area of code that is replacing lab with zoom in the students.js with a regex instead of lots of replaces (or the UI should show the title as set in the PHP instead of from the settings).
-TODO Perhaps consider shrinking the FAQ link size
-TODO Consider A combining a lot of the shared files into one, or using symlinks to be able to not have duplicate code.
-TODO Try to remove as much queue page specific code as possible to essentially be able to just use one set of files.
-
 HelpQueue
 The help queue for CS 142.
 The queue is used as a structured method for students to request and receive help.
@@ -45,3 +39,8 @@ This change was made during Fall 2018 by Nathan Shurtz to prevent "double clicks
 Another change made during this time was the addition of the setting to limit the number of times a student could ask questions per day or per week. It is possible to disable either by simply changing their limit to -1 in the settings. The students are able to see the number of questions they have remaining at the bottom of their page only if the limit is active. If the limit is changed while a student has the queue loaded they will see some negative numbers where the limit information normally is, this is due to the fact that the PHP has already generated the page. It would be possible to use Javascript to hide these elements dynamically, but it is unlikely that the setting be changed while a student is actively using the queue. It is also fixed if they simply refresh their page.
 
 I have made a test user that you should be able to utilize for testing sake. The username is testin5 and the password is 5Eg4bjrh*T%K
+
+September 30, 2019 - Brigham W.: I created a second test user that testin5 may live on as a monument to the original Help Queue Dev: Nathan Shurtz.  The second test user is "testin10" and the password is "58ta@AT6", quotes not included.  It's email is cs142DEVtest@gmail.com, password "66rrbb55".
+October 1, 2019 - Brigham W.: When making changes to the superqueue, remember to put the changes to the zoom queue as well.  Not updating both has caused issues in the past.
+    With the creation of the superqueue at the beginning of May 2019 by Nathan Shurtz, the TA's can view both the zoom queue and the in lab help queue simultaneously.
+    I may create a different file to simply list the updates. 

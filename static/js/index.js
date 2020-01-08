@@ -3065,7 +3065,7 @@ function updateUI(data) {
     }
 
     if (data.hasOwnProperty("other_list")) {
-        if (data.list.length > 0) {
+        if (data.other_list.length > 0) {
             //notification
             //This will show the notification on the screen. Super nice because if a user is not in their browser, the notification
             //will still show up on the screen. Sadly, every time the client polls it removes the current notificaion and displays
