@@ -196,7 +196,10 @@ function verifyStudentInputToggleButton() {
         removeSpinner("getHelpButtonNoQuestion");
         removeSpinner("passOffButtonNoQuestion");
         // console.log(theQuestion);
-        if ((theQuestion.length > 0 && $("#roomSelector").val() != "invalid")|| passOff) {
+        //console.log($('#checkedFAQcheckbox').is(":checked"));
+        if ((theQuestion.length > 0 && $("#roomSelector").val() != "invalid"
+                && $('#checkedFAQcheckbox').is(":checked"))
+                || passOff) {
             //enable the get in line button
             $("#getHelpButton").removeAttr('disabled');
             $("#getHelpButton").html('Get in line for help');
@@ -1640,6 +1643,7 @@ $(function() {
     $("#questionInput").on('input', verifyStudentInputToggleButton);
     $("#passOffCheckBox").on('click', verifyStudentInputToggleButton);
     $("#roomSelector").on('change', verifyStudentInputToggleButton);
+    $("#checkedFAQcheckbox").on('click', verifyStudentInputToggleButton);
 
     $("#getHelpButton").on('click', function() {
         var theQuestion = $("#questionInput").val();
@@ -2349,7 +2353,7 @@ function updateUI(data) {
                             keyboard: false
                         });
                     } else {
-                      var labTitle = value
+                        var labTitle = value
                       if (window.location.pathname.split("/")[2].split("-")[0] === "zoom")
                       {
                         labTitle = labTitle.replace("In Lab", "Zoom").replace("in Lab", "Zoom").replace("in lab", "Zoom").replace("in-lab", "Zoom").replace("In-Lab", "Zoom").replace("Lab", "Zoom").replace("lab", "zoom")
@@ -2528,7 +2532,8 @@ function updateUI(data) {
                     var postfix = getNumberPostFix(spot);
 
                     $("#getHelpButton").html("Get out of line");
-                    $("#queueNum").html('You are currently the <strong>' + spot + postfix + '</strong> in line to get help');
+                    //$("#queueNum").html('You are currently the <strong>' + spot + postfix + '</strong> in line to get help');
+                    $("#queueNum").html('You are currently in line to get help');
                 } else {
                     $("#getHelpButton").html("Done getting help");
                     $("#queueNum").html('<strong>You are currently being helped by ' + data.beingHelpedBy + '</strong>'); //

@@ -12,9 +12,8 @@ else if ($auth)
 <html>
   <head>
     <title>
-      Zoom Help Queue
-      <!-- In-Lab Help Queue -->
-
+      In-Lab Help Queue
+       <!-- Zoom Help Queue -->
     </title>
     <link rel="stylesheet" href="static/css/bootstrap.min.css">
     <link rel="stylesheet" href="static/css/font-awesome.min.css">
@@ -133,9 +132,7 @@ echo "<script> chat = new Chat(user); chat.popfunc = stuChat; </script>";
           <!-- This is for when questions are required -->
           <!--<div class="col-xs-9"> -->
           <div class="col-xs-12">
-            <h1 style="font-size:750%;">
-              <strong>
-                <u>
+
                   <?php
 if (isMOTDLink())
 {
@@ -151,18 +148,22 @@ if (isMOTDLink())
 echo "</a>";
 }
 ?>
-                </u>
-              </strong>
-            </h1>
+            <div class="row">
+         	    <input type="checkbox" id="checkedFAQcheckbox"> I have read the FAQ!
+         	    (<a href='http://bit.ly/CS142GeneralFAQ'>click here for a link</a>)
+            </div>
+            <br>
+
+
             <div class="row">
               <!-- width = 80% for inlab and 100 % for zoom -->
-              <div class="col-xs-1" style="width:100%;">
+              <div class="col-xs-1" style="width:80%;">
                 <input class="form-control" type="text" id="questionInput" placeholder="Enter your question here" maxlength="200">
                 <span style="float:left; font-size:75%;" id="questionInputLengthLeft">200 characters remaining
                 </span>
               </div>
               <!-- UNCOMMENT FOR INLAB -->
-              <!-- <div class="col-xs-1" style="width:20%;vertical-align:middle;">
+              <div class="col-xs-1" style="width:20%;vertical-align:middle;">
                 <strong>
                   <select id="roomSelector" style="height:34px">
                   <option selected hidden value="invalid">ROOM #</option>
@@ -172,15 +173,15 @@ echo "</a>";
                   <option value="1102">1102</option>
                   </select>
                 </strong>
-              </div> -->
+              </div>
               <!-- COMMENT FOR INLAB -->
-              <div class="col-xs-1" style="width:20%;vertical-align:middle;" hidden>
+              <!-- <div class="col-xs-1" style="width:20%;vertical-align:middle;" hidden>
                 <strong>
                   <select id="roomSelector" style="height:34px" disabled>
                     <option selected hidden value="ZOOM">ZOOMS</option>
                   </select>
                 </strong>
-              </div>
+              </div> -->
             </div>
           </div>
           <!--
